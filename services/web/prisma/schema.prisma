@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  // Para visualizar o diagrama gerado (`dbml/schema.dbml`), acesse: https://dbdiagram.io/d
+  provider = "prisma-dbml-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResourceAccessGrantType {
+  PRIVATE
+  PUBLIC
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  images    Image[]
+  albums    Album[]
+  tags      Tag[]
+  favorites Favorite[]
+
+  @@map("users")
+}
+
+model Image {
+  id          String                  @id @default(uuid(7))
+  key         String                  @unique
+  accessGrant ResourceAccessGrantType @default(PRIVATE) @map("access_grant")
+  description String?
+  metadata    Json?
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  ownerId     Int                     @map("owner_id")
+
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  albuns    Album[]    @relation("albuns_images") // Implicit many-to-many relation
+  tags      Tag[]
+  favorites Favorite[]
+
+  @@map("images")
+}
+
+model Album {
+  id          String                  @id @default(uuid(7))
+  title       String
+  accessGrant ResourceAccessGrantType @default(PRIVATE) @map("access_grant")
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  ownerId     Int                     @map("owner_id")
+
+  owner  User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  images Image[] @relation("albuns_images") // Implicit many-to-many relation
+
+  @@map("albums")
+}
+
+model Tag {
+  id        String   @id @default(uuid(7))
+  key       String   @unique
+  label     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ownerId   Int?     @map("owner_id")
+
+  owner  User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  images Image[]
+
+  @@map("tags")
+}
+
+model Favorite {
+  userId    Int      @map("user_id")
+  imageId   String   @map("image_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@id([userId, imageId])
+  @@map("favorites")
+}
