@@ -1,0 +1,30 @@
+volumes:
+  database_data:
+
+services:
+  app:
+    image: pixelgrid/app:latest
+    build:
+      context: ./services/web
+      target: production
+    env_file:
+      - ./services/web/.env
+    environment:
+      - DATABASE_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@database:${DATABASE_PORT}/${DATABASE_NAME}?schema=public
+    ports:
+      - 3000:3000
+    depends_on:
+      - database
+
+  database:
+    image: postgres:16-alpine
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    env_file:
+      - ./services/web/.env
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - 5432:5432

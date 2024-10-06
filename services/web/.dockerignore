@@ -1,0 +1,11 @@
+coverage
+dist
+node_modules
+uploads
+tmp
+etc
+Dockerfile
+docker-compose.*
+.git
+.gitignore
+*.md
