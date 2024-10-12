@@ -1,7 +1,6 @@
-import { Button, Title } from '@mantine/core';
+import { Title } from '@mantine/core';
 
 import { auth } from '@/services/auth';
-import { handleSignOut } from '@/actions/auth';
 
 export default async function DashboardHome() {
   const session = await auth();
@@ -9,9 +8,6 @@ export default async function DashboardHome() {
   return (
     <>
       <Title>Olá, {session?.user.name}!</Title>
-      <form action={handleSignOut}>
-        <Button type="submit">Sign out</Button>
-      </form>
     </>
   );
 }

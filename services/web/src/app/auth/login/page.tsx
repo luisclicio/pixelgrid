@@ -71,6 +71,7 @@ export default function AuthLogin({
           <Stack>
             <TextInput
               label="E-mail"
+              type="email"
               placeholder="Informe seu e-mail"
               withAsterisk
               key={form.key('email')}

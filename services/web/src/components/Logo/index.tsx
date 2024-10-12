@@ -28,11 +28,11 @@ export function LogoIcon({ h = 56, withAlt = true, ...props }: LogoIconProps) {
 export function LogoWithText(props: LogoWithTextProps) {
   return (
     <Center {...props}>
-      <LogoIcon h={44} mr="sm" withAlt={false} />
+      <LogoIcon h={36} mr="sm" withAlt={false} />
 
       <Text
         tt="uppercase"
-        fz="h1"
+        fz={32}
         fw="bold"
         variant="gradient"
         gradient={{ from: 'blue.9', to: 'blue.3' }}

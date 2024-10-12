@@ -74,6 +74,7 @@ export default function AuthRegister() {
 
             <TextInput
               label="E-mail"
+              type="email"
               placeholder="Informe seu e-mail"
               withAsterisk
               key={form.key('email')}
