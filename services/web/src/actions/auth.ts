@@ -4,6 +4,7 @@ import { AuthError } from 'next-auth';
 
 import type { LoginSchema, RegisterSchema } from '@/types';
 import { signIn, signOut } from '@/services/auth';
+import { prisma } from '@/services/db';
 
 export type HandleCredentialsLogin = LoginSchema & {
   redirectTo?: string;
@@ -38,9 +39,15 @@ export async function handleCredentialsRegister({
   name,
 }: HandleCredentialsRegister) {
   try {
-    // TODO: Create user on database
-    console.log('User created:', { email, name });
-  } catch {
+    await prisma.user.create({
+      data: {
+        email,
+        password, // TODO: Hash password
+        name,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating user:', error);
     throw new Error('Erro ao realizar cadastro.');
   }
 

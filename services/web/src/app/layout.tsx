@@ -7,7 +7,9 @@ import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'PixelGrid',
-  description: 'PixelGrid - The image classification tool',
+  description: 'PixelGrid - Your gallery organized by artificial intelligence',
+  keywords:
+    'pixelgrid, gallery, artificial intelligence, image classification, photo organization',
 };
 
 export default function RootLayout({

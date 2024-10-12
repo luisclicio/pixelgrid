@@ -4,11 +4,16 @@ import Credentials from 'next-auth/providers/credentials';
 import { JWT } from 'next-auth/jwt';
 
 import { loginSchema } from '@/libs/validation';
+import { prisma } from './db';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: '/auth/login',
     error: '/auth/login',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
     Credentials({
@@ -25,11 +30,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const { email, password } = parsedCredentials.data;
 
-        if (email === 'user@mail.com' && password === 'password') {
+        const user = await prisma.user.findUnique({
+          where: {
+            email,
+          },
+        });
+
+        if (!user) {
+          return null;
+        }
+
+        // TODO: Verify based on hashed password
+        if (password === user.password) {
           return {
-            id: '1',
-            name: 'User',
-            email: email,
+            id: user.id.toString(),
+            name: user.name,
+            email: user.email,
           };
         }
 
