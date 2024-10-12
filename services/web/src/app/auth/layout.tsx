@@ -2,6 +2,8 @@
 
 import { Center, Container, useComputedColorScheme } from '@mantine/core';
 
+import { LogoWithText } from '@/components/Logo';
+
 export default function AuthLayout({
   children,
 }: {
@@ -18,6 +20,8 @@ export default function AuthLayout({
       bg={computedColorScheme === 'light' ? 'gray.0' : 'dark.9'}
     >
       <Container size="xs" w="100%">
+        <LogoWithText mb="md" />
+
         {children}
       </Container>
     </Center>
