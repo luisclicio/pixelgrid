@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,8 +41,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        // TODO: Verify based on hashed password
-        if (password === user.password) {
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (passwordMatch) {
           return {
             id: user.id.toString(),
             name: user.name,

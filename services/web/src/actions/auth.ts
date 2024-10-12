@@ -1,6 +1,7 @@
 'use server';
 
 import { AuthError } from 'next-auth';
+import bcrypt from 'bcryptjs';
 
 import type { LoginSchema, RegisterSchema } from '@/types';
 import { signIn, signOut } from '@/services/auth';
@@ -42,7 +43,7 @@ export async function handleCredentialsRegister({
     await prisma.user.create({
       data: {
         email,
-        password, // TODO: Hash password
+        password: await bcrypt.hash(password, 10),
         name,
       },
     });
