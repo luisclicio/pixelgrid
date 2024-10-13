@@ -24,7 +24,6 @@ import { useForm, zodResolver } from '@mantine/form';
 import { useId } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconUpload, IconPhoto, IconX, IconCheck } from '@tabler/icons-react';
-import { useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import type { SaveImagesSchema } from '@/types';
@@ -33,17 +32,80 @@ import { saveImagesSchema } from '@/libs/validation';
 
 export const IMAGES_UPLOADER_MODAL_KEY = 'IMAGES_UPLOADER_MODAL_KEY';
 
+/**
+ * Store to keep track of selected images and their URLs
+ */
+class SelectedImagesStore {
+  private selectedImagesMap: Map<string, { file: File; url: string }> =
+    new Map();
+
+  get values() {
+    return Array.from(this.selectedImagesMap.values());
+  }
+
+  get size() {
+    return this.selectedImagesMap.size;
+  }
+
+  add(file: File) {
+    if (this.selectedImagesMap.has(file.name)) {
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    this.selectedImagesMap.set(file.name, { file, url });
+  }
+
+  get(filename: string) {
+    return this.selectedImagesMap.get(filename);
+  }
+
+  remove(filename: string) {
+    const image = this.selectedImagesMap.get(filename);
+
+    if (image) {
+      URL.revokeObjectURL(image.url);
+      this.selectedImagesMap.delete(filename);
+    }
+  }
+
+  clear() {
+    this.selectedImagesMap.forEach(({ url }) => URL.revokeObjectURL(url));
+    this.selectedImagesMap.clear();
+  }
+}
+
+const selectedImagesStore = new SelectedImagesStore();
+
 export function ImagesUploaderModal({ context, id }: ContextModalProps) {
   const dropzoneId = useId();
   const form = useForm<SaveImagesSchema>({
     initialValues: {
-      files: [],
+      files: selectedImagesStore.values.map(({ file }) => file),
     },
 
     validate: zodResolver(saveImagesSchema),
+
+    onValuesChange(values, previousValues) {
+      // Check for removed and added files to update the selected images store
+      const files = values.files;
+      const previousFiles = previousValues.files;
+
+      const removedFiles = previousFiles.filter(
+        (file) => !files.includes(file)
+      );
+      const addedFiles = files.filter((file) => !previousFiles.includes(file));
+
+      removedFiles.forEach((file) => {
+        selectedImagesStore.remove(file.name);
+      });
+
+      addedFiles.forEach((file) => {
+        selectedImagesStore.add(file);
+      });
+    },
   });
   const filesList = form.getTransformedValues().files;
-  const filesUrlsRef = useRef<Record<string, string>>({});
   const imagesUploadMutation = useMutation({
     mutationFn: async (values: typeof form.values) => {
       const formData = new FormData();
@@ -55,6 +117,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
     onSuccess: () => {
       context.closeModal(id);
       form.reset();
+      selectedImagesStore.clear();
       notifications.show({
         title: 'Imagens enviadas com sucesso!',
         message: 'As imagens foram enviadas e serão organizadas em breve.',
@@ -81,15 +144,8 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
   async function handleReset() {
     context.closeModal(id);
     form.reset();
+    selectedImagesStore.clear();
   }
-
-  useEffect(() => {
-    const filesUrls = filesUrlsRef.current;
-
-    return () => {
-      Object.values(filesUrls).forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, []);
 
   return (
     <>
@@ -185,45 +241,65 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
           </Input.Wrapper>
 
           {filesList.length > 0 && (
-            <ScrollArea.Autosize mah={rem(340)} type="scroll">
-              <SimpleGrid cols={{ base: 3, sm: 4 }}>
-                {filesList.map((file, index) => {
-                  if (!(file.name in filesUrlsRef.current)) {
-                    filesUrlsRef.current[file.name] = URL.createObjectURL(file);
-                  }
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Text size="sm" c="dimmed">
+                  <strong>{filesList.length}</strong>{' '}
+                  {filesList.length > 1
+                    ? 'imagens selecionadas'
+                    : 'imagem selecionada'}
+                </Text>
 
-                  const url = filesUrlsRef.current[file.name];
+                <Button
+                  variant="subtle"
+                  size="compact-sm"
+                  color="red"
+                  disabled={imagesUploadMutation.isPending}
+                  onClick={() => form.setFieldValue('files', [])}
+                >
+                  Limpar seleção
+                </Button>
+              </Group>
 
-                  return (
-                    <Box key={index} pos="relative">
-                      <AspectRatio ratio={1}>
-                        <Image
-                          src={url}
-                          alt={file.name}
-                          fit="cover"
-                          radius="md"
-                          loading="lazy"
+              <ScrollArea.Autosize mah={rem(340)} type="scroll">
+                <SimpleGrid cols={{ base: 3, sm: 4 }}>
+                  {filesList.map((file, index) => {
+                    const url = selectedImagesStore.get(file.name)?.url;
+
+                    if (!url) {
+                      return null;
+                    }
+
+                    return (
+                      <Box key={index} pos="relative">
+                        <AspectRatio ratio={1}>
+                          <Image
+                            src={url}
+                            alt={file.name}
+                            fit="cover"
+                            radius="md"
+                            loading="lazy"
+                          />
+                        </AspectRatio>
+
+                        <CloseButton
+                          aria-label={`Remover ${file.name}`}
+                          bg="var(--mantine-color-body)"
+                          c="red"
+                          pos="absolute"
+                          top={4}
+                          right={4}
+                          disabled={imagesUploadMutation.isPending}
+                          onClick={() => {
+                            form.removeListItem('files', index);
+                          }}
                         />
-                      </AspectRatio>
-
-                      <CloseButton
-                        aria-label={`Remover ${file.name}`}
-                        bg="var(--mantine-color-body)"
-                        c="red"
-                        pos="absolute"
-                        top={4}
-                        right={4}
-                        disabled={imagesUploadMutation.isPending}
-                        onClick={() => {
-                          form.removeListItem('files', index);
-                          URL.revokeObjectURL(url);
-                        }}
-                      />
-                    </Box>
-                  );
-                })}
-              </SimpleGrid>
-            </ScrollArea.Autosize>
+                      </Box>
+                    );
+                  })}
+                </SimpleGrid>
+              </ScrollArea.Autosize>
+            </Stack>
           )}
 
           <Group justify="flex-end">
