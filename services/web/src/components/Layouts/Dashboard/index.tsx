@@ -5,6 +5,7 @@ import {
   AppShell,
   Box,
   Burger,
+  Button,
   Group,
   Menu,
   ScrollArea,
@@ -17,6 +18,7 @@ import {
   IconHeart,
   IconLogout,
   IconPhoto,
+  IconPhotoPlus,
   IconShare,
   IconTrash,
 } from '@tabler/icons-react';
@@ -24,6 +26,7 @@ import { usePathname } from 'next/navigation';
 import cx from 'clsx';
 
 import { handleSignOut } from '@/actions/auth';
+import { openImagesUploaderModal } from '@/components/Modals/ImagesUploaderModal';
 import { LogoIcon, LogoWithText } from '@/components/Logo';
 import { UserProfileMenu } from '@/components/Menus/UserProfileMenu';
 import { NavbarItem, type NavbarItemData } from '@/components/NavbarItem';
@@ -96,6 +99,14 @@ export function DashboardLayout({
           </Group>
 
           <Group>
+            <Button
+              variant="default"
+              leftSection={<IconPhotoPlus size={20} />}
+              onClick={openImagesUploaderModal}
+            >
+              Enviar imagens
+            </Button>
+
             <UserProfileMenu user={{ name: session?.user?.name ?? '' }}>
               <Box py={4}>
                 <Text px="xs" fw="bold">
