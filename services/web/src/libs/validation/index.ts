@@ -16,3 +16,7 @@ export const registerSchema = loginSchema.extend({
     .string({ required_error: 'O nome é obrigatório' })
     .min(1, 'O nome é obrigatório'),
 });
+
+export const saveImagesSchema = z.object({
+  files: z.array(z.instanceof(File)).min(1, 'Selecione pelo menos uma imagem'),
+});

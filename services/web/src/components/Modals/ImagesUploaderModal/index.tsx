@@ -20,26 +20,68 @@ import {
   rem,
 } from '@mantine/core';
 import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
-import { hasLength, useForm } from '@mantine/form';
+import { useForm, zodResolver } from '@mantine/form';
 import { useId } from '@mantine/hooks';
-import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { IconUpload, IconPhoto, IconX, IconCheck } from '@tabler/icons-react';
 import { useEffect, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
+
+import type { SaveImagesSchema } from '@/types';
+import { saveImages } from '@/actions/images';
+import { saveImagesSchema } from '@/libs/validation';
 
 export const IMAGES_UPLOADER_MODAL_KEY = 'IMAGES_UPLOADER_MODAL_KEY';
 
 export function ImagesUploaderModal({ context, id }: ContextModalProps) {
   const dropzoneId = useId();
-  const form = useForm<{ files: File[] }>({
+  const form = useForm<SaveImagesSchema>({
     initialValues: {
       files: [],
     },
 
-    validate: {
-      files: hasLength({ min: 1 }, 'Selecione pelo menos uma imagem'),
-    },
+    validate: zodResolver(saveImagesSchema),
   });
   const filesList = form.getTransformedValues().files;
   const filesUrlsRef = useRef<Record<string, string>>({});
+  const imagesUploadMutation = useMutation({
+    mutationFn: async (values: typeof form.values) => {
+      const formData = new FormData();
+
+      values.files.forEach((file) => formData.append('files', file));
+
+      await saveImages(formData);
+    },
+    onSuccess: () => {
+      context.closeModal(id);
+      form.reset();
+      notifications.show({
+        title: 'Imagens enviadas com sucesso!',
+        message: 'As imagens foram enviadas e serão organizadas em breve.',
+        color: 'teal',
+        icon: <IconCheck />,
+      });
+    },
+    onError: (error) => {
+      console.error(error.message);
+      notifications.show({
+        title: 'Erro ao enviar imagens!',
+        message: 'Verifique sua conexão e tente novamente.',
+        color: 'red',
+        icon: <IconX />,
+      });
+    },
+  });
+
+  async function handleSubmit(values: typeof form.values) {
+    imagesUploadMutation.reset();
+    imagesUploadMutation.mutate(values);
+  }
+
+  async function handleReset() {
+    context.closeModal(id);
+    form.reset();
+  }
 
   useEffect(() => {
     const filesUrls = filesUrlsRef.current;
@@ -51,7 +93,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
 
   return (
     <>
-      <form onSubmit={form.onSubmit((values) => console.log(values))}>
+      <form onSubmit={form.onSubmit(handleSubmit)} onReset={handleReset}>
         <Stack>
           <Input.Wrapper
             id={dropzoneId}
@@ -63,6 +105,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
               id={dropzoneId}
               maxSize={5 * 1024 ** 2} // 5 MB
               accept={[MIME_TYPES.png, MIME_TYPES.jpeg]}
+              disabled={imagesUploadMutation.isPending}
               onDrop={(files) => {
                 form.setFieldValue('files', (prevFiles) =>
                   [...prevFiles, ...files].filter(
@@ -170,6 +213,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
                         pos="absolute"
                         top={4}
                         right={4}
+                        disabled={imagesUploadMutation.isPending}
                         onClick={() => {
                           form.removeListItem('files', index);
                           URL.revokeObjectURL(url);
@@ -186,12 +230,16 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
             <Button
               type="reset"
               variant="default"
-              onClick={() => context.closeModal(id)}
+              disabled={imagesUploadMutation.isPending}
             >
               Cancelar
             </Button>
 
-            <Button type="submit" disabled={!form.isValid()}>
+            <Button
+              type="submit"
+              disabled={!form.isValid() || imagesUploadMutation.isPending}
+              loading={imagesUploadMutation.isPending}
+            >
               Enviar
             </Button>
           </Group>

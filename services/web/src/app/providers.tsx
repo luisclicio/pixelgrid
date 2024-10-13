@@ -39,7 +39,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-          <Notifications position="top-center" zIndex={1000} />
+          <Notifications
+            position="top-center"
+            autoClose={10000}
+            zIndex={1000}
+          />
 
           <DatesProvider settings={{ locale: 'pt-br', firstDayOfWeek: 0 }}>
             <ModalsProvider modals={modals}>{children}</ModalsProvider>
