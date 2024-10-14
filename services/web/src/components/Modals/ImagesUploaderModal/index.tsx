@@ -25,6 +25,7 @@ import { useId } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconUpload, IconPhoto, IconX, IconCheck } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 import type { SaveImagesSchema } from '@/types';
 import { saveImages } from '@/actions/images';
@@ -78,6 +79,7 @@ class SelectedImagesStore {
 const selectedImagesStore = new SelectedImagesStore();
 
 export function ImagesUploaderModal({ context, id }: ContextModalProps) {
+  const router = useRouter();
   const dropzoneId = useId();
   const form = useForm<SaveImagesSchema>({
     initialValues: {
@@ -124,6 +126,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
         color: 'teal',
         icon: <IconCheck />,
       });
+      router.refresh();
     },
     onError: (error) => {
       console.error(error.message);

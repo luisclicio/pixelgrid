@@ -1,6 +1,7 @@
 import { BarChart, LineChart } from '@mantine/charts';
 import {
   ActionIcon,
+  Badge,
   Card,
   Checkbox,
   Fieldset,
@@ -23,6 +24,12 @@ export const theme = createTheme({
   defaultRadius: 'md',
 
   components: {
+    Badge: Badge.extend({
+      defaultProps: {
+        variant: 'light',
+      },
+    }),
+
     Paper: Paper.extend({
       defaultProps: {
         withBorder: true,
@@ -31,7 +38,7 @@ export const theme = createTheme({
 
     Card: Card.extend({
       defaultProps: {
-        padding: 'md',
+        p: 'md',
         radius: 'md',
         withBorder: true,
       },

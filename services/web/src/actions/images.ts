@@ -1,6 +1,6 @@
 'use server';
 
-import type { SaveImagesSchema } from '@/types';
+import type { SaveImagesSchema, Image, ImageMetadata } from '@/types';
 import { auth } from '@/services/auth';
 import {
   storage,
@@ -49,4 +49,41 @@ export async function saveImages(
   // TODO: sends images id and key to the broker
 
   return storageSaveResult;
+}
+
+export async function listUserImages(): Promise<Image[]> {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+
+  const images = await prisma.image.findMany({
+    where: {
+      ownerId: Number(session.user.id),
+    },
+    include: {
+      tags: true,
+      favorites: {
+        where: {
+          userId: Number(session.user.id),
+        },
+        select: {
+          userId: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return Promise.all(
+    images.map(async ({ favorites, ...image }) => ({
+      ...image,
+      metadata: image.metadata as ImageMetadata,
+      url: await storage.getSignedUrl(image.key, { expiresIn: '30m' }),
+      favorite: favorites.length > 0,
+    }))
+  );
 }
