@@ -1,5 +1,11 @@
+default:
+  @just --list
+
 prod *ARGS:
   @docker compose {{ARGS}}
+
+prod-prisma *ARGS:
+  @just prod exec app pnpm prisma {{ARGS}}
 
 dev *ARGS:
   @docker compose -f docker-compose.dev.yaml {{ARGS}}

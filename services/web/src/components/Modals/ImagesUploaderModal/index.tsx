@@ -175,7 +175,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
             >
               <Group
                 justify="center"
-                gap="xl"
+                gap="md"
                 mih={220}
                 style={{ pointerEvents: 'none' }}
               >

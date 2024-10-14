@@ -30,7 +30,7 @@ export async function handleCredentialsLogin({
       }
     }
 
-    throw error;
+    throw new Error('Erro ao realizar autenticação.');
   }
 }
 

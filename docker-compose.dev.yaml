@@ -1,5 +1,6 @@
 volumes:
   database_data_dev:
+  storage_data_dev:
   app_dev_node_modules:
 
 services:
@@ -17,6 +18,7 @@ services:
       - 5555:5555
     depends_on:
       - database-dev
+      - storage-dev
 
   database-dev:
     image: postgres:16-alpine
@@ -26,3 +28,13 @@ services:
       - ./services/database/.env
     ports:
       - 5432:5432
+
+  storage-dev:
+    build: ./services/storage
+    env_file:
+      - ./services/storage/.env
+    volumes:
+      - storage_data_dev:/data
+    ports:
+      - 9000:9000
+      - 9001:9001

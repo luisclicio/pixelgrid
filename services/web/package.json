@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.670.0",
+    "@aws-sdk/s3-request-presigner": "^3.670.0",
     "@mantine/carousel": "^7.12.2",
     "@mantine/charts": "^7.12.2",
     "@mantine/core": "^7.12.2",
@@ -27,6 +29,7 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "embla-carousel-react": "^8.3.0",
+    "flydrive": "^1.1.0",
     "mantine-datatable": "^7.12.4",
     "mantine-form-zod-resolver": "^1.1.0",
     "next": "14.2.12",

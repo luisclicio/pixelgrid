@@ -3,6 +3,7 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     optimizePackageImports: ['@mantine/core', '@mantine/hooks'],
+    serverComponentsExternalPackages: ['flydrive'],
   },
 };
 
