@@ -3,6 +3,14 @@ volumes:
   storage_data_dev:
   app_dev_node_modules:
 
+networks:
+  storage_net_dev:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 180.24.0.0/16
+          gateway: 180.24.0.1
+
 services:
   app-dev:
     build:
@@ -13,9 +21,15 @@ services:
       - app_dev_node_modules:/app/node_modules
     env_file:
       - ./services/web/.env
+    environment:
+      - STORAGE_S3_ENDPOINT=http://180.24.0.2:9000
     ports:
       - 3000:3000
       - 5555:5555
+    networks:
+      default:
+      storage_net_dev:
+        ipv4_address: 180.24.0.3
     depends_on:
       - database-dev
       - storage-dev
@@ -38,3 +52,6 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+    networks:
+      storage_net_dev:
+        ipv4_address: 180.24.0.2
