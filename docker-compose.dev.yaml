@@ -47,7 +47,7 @@ services:
         - action: rebuild
           path: ./services/web/package.json
 
-  app-classifier:
+  app-classifier-dev:
     build:
       context: ./services/web
       target: classifier-development
