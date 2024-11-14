@@ -18,11 +18,13 @@ async function main() {
     await channel.prefetch(1);
   });
 
+  const classifyAction = new ClassifyAction();
+
   amqpClient.consumeFromQueue<ClassifyActionPayload>(
     'pixelgrid-images-classifier',
     async ({ data }) => {
       try {
-        const { success, invalid } = await ClassifyAction.execute(data);
+        const { success, invalid } = await classifyAction.execute(data);
         const canAcknowledge = Boolean(success || invalid);
         return canAcknowledge;
       } catch (error) {
