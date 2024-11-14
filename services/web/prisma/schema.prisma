@@ -68,7 +68,7 @@ model Album {
 model Tag {
   id        String   @id @default(uuid(7))
   key       String   @unique
-  label     String
+  label     String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   ownerId   Int?     @map("owner_id")
