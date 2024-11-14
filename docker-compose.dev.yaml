@@ -1,7 +1,6 @@
 volumes:
   database_data_dev:
   storage_data_dev:
-  app_dev_node_modules:
 
 networks:
   storage_net_dev:
@@ -16,9 +15,6 @@ services:
     build:
       context: ./services/web
       target: development
-    volumes:
-      - ./services/web/:/app/
-      - app_dev_node_modules:/app/node_modules
     env_file:
       - ./services/web/.env
     environment:
@@ -33,6 +29,17 @@ services:
     depends_on:
       - database-dev
       - storage-dev
+    develop:
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: ./services/web/
+          target: /app
+          ignore:
+            - node_modules/
+
+        - action: rebuild
+          path: ./services/web/package.json
 
   database-dev:
     image: postgres:16-alpine

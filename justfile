@@ -11,7 +11,7 @@ dev *ARGS:
   @docker compose -f docker-compose.dev.yaml {{ARGS}}
 
 dev-up *ARGS:
-  @just dev up --remove-orphans {{ARGS}}
+  @just dev up --remove-orphans --watch {{ARGS}}
 
 dev-prisma *ARGS:
   @just dev exec app-dev pnpm prisma {{ARGS}}
