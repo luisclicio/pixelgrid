@@ -1,6 +1,7 @@
 volumes:
   database_data_dev:
   storage_data_dev:
+  broker_data_dev:
 
 networks:
   storage_net_dev:
@@ -14,7 +15,7 @@ services:
   app-dev:
     build:
       context: ./services/web
-      target: development
+      target: web-development
     env_file:
       - ./services/web/.env
     environment:
@@ -27,8 +28,45 @@ services:
       storage_net_dev:
         ipv4_address: 180.24.0.3
     depends_on:
-      - database-dev
-      - storage-dev
+      database-dev:
+        condition: service_started
+      storage-dev:
+        condition: service_healthy
+      broker-dev:
+        condition: service_healthy
+        restart: true
+    develop:
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: ./services/web/
+          target: /app
+          ignore:
+            - node_modules/
+
+        - action: rebuild
+          path: ./services/web/package.json
+
+  app-classifier:
+    build:
+      context: ./services/web
+      target: classifier-development
+    env_file:
+      - ./services/web/.env
+    environment:
+      - STORAGE_S3_ENDPOINT=http://180.24.0.2:9000
+    networks:
+      default:
+      storage_net_dev:
+        ipv4_address: 180.24.0.4
+    depends_on:
+      database-dev:
+        condition: service_started
+      storage-dev:
+        condition: service_healthy
+      broker-dev:
+        condition: service_healthy
+        restart: true
     develop:
       watch:
         # Sync the working directory with the `/app` directory in the container
@@ -62,3 +100,13 @@ services:
     networks:
       storage_net_dev:
         ipv4_address: 180.24.0.2
+
+  broker-dev:
+    build: ./services/broker
+    ports:
+      - 15672:15672
+      - 5672:5672
+    env_file:
+      - ./services/broker/.env
+    volumes:
+      - broker_data_dev:/var/lib/rabbitmq/

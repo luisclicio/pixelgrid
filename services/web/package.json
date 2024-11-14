@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "classifier:dev": "node --import=tsx --watch src/classifier/index.ts",
+    "classifier:start": "node src/classifier/index.js"
   },
   "prisma": {
     "seed": "node --import=tsx prisma/seed/seed.js"
@@ -46,10 +48,12 @@
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.56.1",
+    "@types/amqplib": "^0.10.5",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20",
+    "@types/node": "^20.16.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "amqplib": "^0.10.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.12",
     "postcss": "^8.4.47",

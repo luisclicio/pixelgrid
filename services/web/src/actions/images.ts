@@ -8,7 +8,9 @@ import {
   type SaveFileToStorageResult,
   type SaveFileToStorageResultSuccess,
 } from '@/services/storage';
+import type { ClassifyActionPayload } from '@/classifier/actions/classify.action';
 import { prisma } from '@/services/db';
+import { amqpClient } from '@/services/amqp';
 
 export async function saveImages(
   formData: FormData
@@ -34,7 +36,7 @@ export async function saveImages(
     throw new Error('No images saved');
   }
 
-  await prisma.image.createMany({
+  const imagesData = await prisma.image.createManyAndReturn({
     data: savedImages.map((image) => ({
       key: image.key,
       metadata: {
@@ -44,9 +46,21 @@ export async function saveImages(
       },
       ownerId: Number(session.user.id),
     })),
+    select: {
+      id: true,
+      key: true,
+    },
   });
 
-  // TODO: sends images id and key to the broker
+  await Promise.all(
+    imagesData.map((image) =>
+      amqpClient.publishToExchange<ClassifyActionPayload>(
+        'pixelgrid',
+        'pixelgrid.images',
+        image
+      )
+    )
+  );
 
   return storageSaveResult;
 }
