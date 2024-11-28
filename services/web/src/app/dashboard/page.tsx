@@ -1,13 +1,14 @@
-import { Group, MultiSelect, SimpleGrid, Stack } from '@mantine/core';
+import { Group, MultiSelect, Stack } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
 
 import { listUserImages } from '@/actions/images';
-import { listUserTags } from '@/actions/tags';
-import { ImageCard } from '@/components/Cards/ImageCard';
+import { listAvailableUserTags } from '@/actions/tags';
+import { ImageCard, ImageCardGrid } from '@/components/Cards/ImageCard';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
 
 export default async function DashboardHome() {
   const userImages = await listUserImages();
-  const userTags = await listUserTags();
+  const userTags = await listAvailableUserTags();
 
   return (
     <Stack>
@@ -20,6 +21,7 @@ export default async function DashboardHome() {
           }))}
           clearable
           searchable
+          leftSection={<IconSearch size={20} />}
           maw={800}
           style={{ flex: 1 }}
         />
@@ -27,11 +29,11 @@ export default async function DashboardHome() {
         <RefreshPageButton />
       </Group>
 
-      <SimpleGrid cols={{ xs: 2, md: 3, xl: 4 }}>
+      <ImageCardGrid>
         {userImages.map((image) => (
           <ImageCard key={image.id} image={image} />
         ))}
-      </SimpleGrid>
+      </ImageCardGrid>
     </Stack>
   );
 }

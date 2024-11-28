@@ -16,6 +16,7 @@ import {
   CardSection,
   Box,
   Divider,
+  SimpleGrid,
 } from '@mantine/core';
 
 import type { Image } from '@/types';
@@ -49,7 +50,7 @@ export function ImageCard({ image }: ImageCardProps) {
         {image?.description && <Text fz="sm">{image?.description}</Text>}
       </Box>
 
-      <CardSection py="sm" mt="auto">
+      <CardSection py="sm">
         <Divider />
       </CardSection>
 
@@ -71,7 +72,7 @@ export function ImageCard({ image }: ImageCardProps) {
         )}
       </Box>
 
-      <CardSection py="sm">
+      <CardSection py="sm" mt="auto">
         <Divider />
       </CardSection>
 
@@ -98,4 +99,8 @@ export function ImageCard({ image }: ImageCardProps) {
       </Group>
     </Card>
   );
+}
+
+export function ImageCardGrid({ children }: { children: React.ReactNode }) {
+  return <SimpleGrid cols={{ xs: 2, md: 3, xl: 4 }}>{children}</SimpleGrid>;
 }
