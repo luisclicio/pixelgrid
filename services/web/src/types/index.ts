@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { Image as PrismaImage, Tag as PrismaTag } from '@prisma/client';
+import {
+  Image as PrismaImage,
+  Tag as PrismaTag,
+  Album as PrismaAlbum,
+} from '@prisma/client';
 
 import {
   loginSchema,
@@ -27,3 +31,5 @@ export type Image = PrismaImage & {
   favorite: boolean;
   url?: string;
 };
+
+export type Album = PrismaAlbum;
