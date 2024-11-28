@@ -3,6 +3,7 @@ import {
   IconHeart,
   IconHeartFilled,
   IconInfoCircle,
+  IconRestore,
   IconShare,
   IconTrash,
 } from '@tabler/icons-react';
@@ -17,15 +18,20 @@ import {
   Box,
   Divider,
   SimpleGrid,
+  Tooltip,
 } from '@mantine/core';
 
 import type { Image } from '@/types';
 
 export type ImageCardProps = {
   image: Image;
+  withRestoreButton?: boolean;
 };
 
-export function ImageCard({ image }: ImageCardProps) {
+export function ImageCard({
+  image,
+  withRestoreButton = false,
+}: ImageCardProps) {
   return (
     <Card pb="sm">
       <CardSection>
@@ -77,25 +83,43 @@ export function ImageCard({ image }: ImageCardProps) {
       </CardSection>
 
       <Group justify="space-between">
-        <ActionIcon variant="subtle">
-          <IconTrash />
-        </ActionIcon>
+        <Tooltip label="Excluir">
+          <ActionIcon variant="subtle">
+            <IconTrash />
+          </ActionIcon>
+        </Tooltip>
 
-        <ActionIcon variant="subtle">
-          <IconShare />
-        </ActionIcon>
+        {withRestoreButton && (
+          <Tooltip label="Restaurar">
+            <ActionIcon variant="subtle">
+              <IconRestore />
+            </ActionIcon>
+          </Tooltip>
+        )}
 
-        <ActionIcon variant="subtle">
-          <IconInfoCircle />
-        </ActionIcon>
+        <Tooltip label="Compartilhar">
+          <ActionIcon variant="subtle">
+            <IconShare />
+          </ActionIcon>
+        </Tooltip>
 
-        <ActionIcon variant="subtle">
-          <IconDownload />
-        </ActionIcon>
+        <Tooltip label="Ver detalhes">
+          <ActionIcon variant="subtle">
+            <IconInfoCircle />
+          </ActionIcon>
+        </Tooltip>
 
-        <ActionIcon variant="subtle" c={image.favorite ? 'red' : undefined}>
-          {image.favorite ? <IconHeartFilled /> : <IconHeart />}
-        </ActionIcon>
+        <Tooltip label="Baixar">
+          <ActionIcon variant="subtle">
+            <IconDownload />
+          </ActionIcon>
+        </Tooltip>
+
+        <Tooltip label="Favoritar">
+          <ActionIcon variant="subtle" c={image.favorite ? 'red' : undefined}>
+            {image.favorite ? <IconHeartFilled /> : <IconHeart />}
+          </ActionIcon>
+        </Tooltip>
       </Group>
     </Card>
   );
