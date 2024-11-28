@@ -12,6 +12,10 @@ import type { ClassifyActionPayload } from '@/classifier/actions/classify.action
 import { prisma } from '@/services/db';
 import { amqpClient } from '@/services/amqp';
 
+export type ListUserImagesProps = {
+  onlyPublic?: boolean;
+};
+
 export async function saveImages(
   formData: FormData
 ): Promise<SaveFileToStorageResult[]> {
@@ -65,7 +69,9 @@ export async function saveImages(
   return storageSaveResult;
 }
 
-export async function listUserImages(): Promise<Image[]> {
+export async function listUserImages({
+  onlyPublic = false,
+}: ListUserImagesProps = {}): Promise<Image[]> {
   const session = await auth();
 
   if (!session) {
@@ -75,6 +81,7 @@ export async function listUserImages(): Promise<Image[]> {
   const images = await prisma.image.findMany({
     where: {
       ownerId: Number(session.user.id),
+      ...(onlyPublic && { accessGrantType: 'PUBLIC' }),
     },
     include: {
       tags: true,
