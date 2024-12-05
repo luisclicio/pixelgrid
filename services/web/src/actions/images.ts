@@ -1,14 +1,15 @@
 'use server';
 
 import type { SaveImagesSchema, Image, ImageMetadata } from '@/types';
+import type { ClassifyActionPayload } from '@/classifier/actions/classify.action';
 import { auth } from '@/services/auth';
 import {
   storage,
   saveFileToStorage,
+  deleteFileFromStorage,
   type SaveFileToStorageResult,
   type SaveFileToStorageResultSuccess,
 } from '@/services/storage';
-import type { ClassifyActionPayload } from '@/classifier/actions/classify.action';
 import { prisma } from '@/services/db';
 import { amqpClient } from '@/services/amqp';
 
@@ -111,4 +112,96 @@ export async function listUserImages({
       favorite: favorites.length > 0,
     }))
   );
+}
+
+export async function deleteImages(
+  imageIds: Image['id'][],
+  { onlyMoveToTrash = true } = {}
+): Promise<void> {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+
+  if (onlyMoveToTrash) {
+    await prisma.image.updateMany({
+      where: {
+        id: {
+          in: imageIds,
+        },
+      },
+      data: {
+        movedToTrash: true,
+      },
+    });
+  } else {
+    const imagesToDelete = await prisma.image.findMany({
+      where: {
+        id: {
+          in: imageIds,
+        },
+      },
+      select: {
+        id: true,
+        key: true,
+      },
+    });
+
+    await Promise.all(
+      imagesToDelete.map((image) => deleteFileFromStorage(storage, image.key))
+    );
+
+    await prisma.image.deleteMany({
+      where: {
+        id: {
+          in: imagesToDelete.map((image) => image.id),
+        },
+      },
+    });
+  }
+}
+
+export async function deleteAllUserImagesOnTrash(): Promise<void> {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+
+  const imagesToDelete = await prisma.image.findMany({
+    where: {
+      ownerId: Number(session.user.id),
+      movedToTrash: true,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  await deleteImages(
+    imagesToDelete.map((image) => image.id),
+    { onlyMoveToTrash: false }
+  );
+}
+
+export async function restoreImagesFromTrash(
+  imageIds: Image['id'][]
+): Promise<void> {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+
+  await prisma.image.updateMany({
+    where: {
+      id: {
+        in: imageIds,
+      },
+    },
+    data: {
+      movedToTrash: false,
+    },
+  });
 }

@@ -59,3 +59,10 @@ export async function saveFileToStorage(
     };
   }
 }
+
+export async function deleteFileFromStorage(
+  storage: Disk,
+  key: string
+): Promise<void> {
+  return await storage.delete(key);
+}

@@ -1,10 +1,11 @@
-import { Stack, Group, Autocomplete, Title, Text, Button } from '@mantine/core';
-import { IconSearch, IconTrashX } from '@tabler/icons-react';
+import { Stack, Group, Autocomplete, Title, Text } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
 
 import { listUserAlbums } from '@/actions/albums';
 import { listUserImages } from '@/actions/images';
 import { listAvailableUserTags } from '@/actions/tags';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
+import { EmptyTrashButton } from '@/components/Buttons/EmptyTrashButton';
 import { AlbumCardGrid, AlbumCard } from '@/components/Cards/AlbumCard';
 import { ImageCardGrid, ImageCard } from '@/components/Cards/ImageCard';
 
@@ -36,13 +37,9 @@ export default async function DashboardTrash() {
         <Group>
           <RefreshPageButton />
 
-          <Button
-            color="red"
-            leftSection={<IconTrashX />}
+          <EmptyTrashButton
             disabled={userAlbums.length === 0 && userImages.length === 0}
-          >
-            Esvaziar lixeira
-          </Button>
+          />
         </Group>
       </Group>
 
@@ -52,7 +49,7 @@ export default async function DashboardTrash() {
         {userAlbums.length > 0 ? (
           <AlbumCardGrid>
             {userAlbums.map((album) => (
-              <AlbumCard key={album.id} album={album} withRestoreButton />
+              <AlbumCard key={album.id} album={album} />
             ))}
           </AlbumCardGrid>
         ) : (
@@ -66,7 +63,7 @@ export default async function DashboardTrash() {
         {userImages.length > 0 ? (
           <ImageCardGrid>
             {userImages.map((image) => (
-              <ImageCard key={image.id} image={image} withRestoreButton />
+              <ImageCard key={image.id} image={image} />
             ))}
           </ImageCardGrid>
         ) : (

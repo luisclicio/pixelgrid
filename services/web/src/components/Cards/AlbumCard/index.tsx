@@ -20,18 +20,83 @@ import {
   IconTrash,
 } from '@tabler/icons-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { modals } from '@mantine/modals';
 
 import type { Album } from '@/types';
+import { deleteAlbums, restoreAlbumsFromTrash } from '@/actions/albums';
 
 export type AlbumCardProps = {
   album: Album;
-  withRestoreButton?: boolean;
 };
 
-export function AlbumCard({
-  album,
-  withRestoreButton = false,
-}: AlbumCardProps) {
+export function AlbumCard({ album }: AlbumCardProps) {
+  const router = useRouter();
+
+  function handleOpenAction() {
+    router.push(`/dashboard/albums/${album.id}`);
+  }
+
+  function handleDeleteAction() {
+    modals.openConfirmModal({
+      size: 'md',
+      title: album.movedToTrash
+        ? 'Excluir álbum permanentemente'
+        : 'Mover álbum para a lixeira',
+      centered: true,
+      children: (
+        <Text>
+          {album.movedToTrash
+            ? 'Tem certeza que deseja excluir permanentemente este álbum? As imagens dentro dele também serão excluídas.'
+            : 'Tem certeza que deseja mover este álbum para a lixeira?'}
+        </Text>
+      ),
+      labels: {
+        confirm: album.movedToTrash
+          ? 'Excluir permanentemente'
+          : 'Mover para a lixeira',
+        cancel: 'Cancelar',
+      },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await deleteAlbums([album.id], {
+            onlyMoveToTrash: !album.movedToTrash,
+          });
+          router.refresh();
+        } catch (error) {
+          console.error(error);
+        }
+      },
+    });
+  }
+
+  function handleRestoreAction() {
+    modals.openConfirmModal({
+      size: 'md',
+      title: 'Restaurar álbum',
+      centered: true,
+      children: (
+        <Text>
+          Tem certeza que deseja restaurar esta álbum da lixeira? Ela voltará
+          para a lista de álbuns.
+        </Text>
+      ),
+      labels: {
+        confirm: 'Restaurar',
+        cancel: 'Cancelar',
+      },
+      onConfirm: async () => {
+        try {
+          await restoreAlbumsFromTrash([album.id]);
+          router.refresh();
+        } catch (error) {
+          console.error(error);
+        }
+      },
+    });
+  }
+
   return (
     <Box pos="relative">
       <Card component={Link} href={`/dashboard/albums/${album.id}`} p="sm">
@@ -59,7 +124,10 @@ export function AlbumCard({
         </Menu.Target>
 
         <Menu.Dropdown>
-          <Menu.Item leftSection={<IconFolderOpen size={18} />}>
+          <Menu.Item
+            leftSection={<IconFolderOpen size={18} />}
+            onClick={handleOpenAction}
+          >
             Abrir
           </Menu.Item>
 
@@ -71,13 +139,20 @@ export function AlbumCard({
             Compartilhar
           </Menu.Item>
 
-          {withRestoreButton && (
-            <Menu.Item leftSection={<IconRestore size={18} />}>
+          {album.movedToTrash && (
+            <Menu.Item
+              leftSection={<IconRestore size={18} />}
+              onClick={handleRestoreAction}
+            >
               Restaurar
             </Menu.Item>
           )}
 
-          <Menu.Item color="red" leftSection={<IconTrash size={18} />}>
+          <Menu.Item
+            color="red"
+            leftSection={<IconTrash size={18} />}
+            onClick={handleDeleteAction}
+          >
             Excluir
           </Menu.Item>
         </Menu.Dropdown>

@@ -1,3 +1,5 @@
+'use client';
+
 import {
   IconDownload,
   IconHeart,
@@ -20,18 +22,79 @@ import {
   SimpleGrid,
   Tooltip,
 } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { useRouter } from 'next/navigation';
 
 import type { Image } from '@/types';
+import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
 
 export type ImageCardProps = {
   image: Image;
-  withRestoreButton?: boolean;
 };
 
-export function ImageCard({
-  image,
-  withRestoreButton = false,
-}: ImageCardProps) {
+export function ImageCard({ image }: ImageCardProps) {
+  const router = useRouter();
+
+  function handleDeleteAction() {
+    modals.openConfirmModal({
+      size: 'md',
+      title: image.movedToTrash
+        ? 'Excluir imagem permanentemente'
+        : 'Mover imagem para a lixeira',
+      centered: true,
+      children: (
+        <Text>
+          {image.movedToTrash
+            ? 'Tem certeza que deseja excluir permanentemente esta imagem?'
+            : 'Tem certeza que deseja mover esta imagem para a lixeira?'}
+        </Text>
+      ),
+      labels: {
+        confirm: image.movedToTrash
+          ? 'Excluir permanentemente'
+          : 'Mover para a lixeira',
+        cancel: 'Cancelar',
+      },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await deleteImages([image.id], {
+            onlyMoveToTrash: !image.movedToTrash,
+          });
+          router.refresh();
+        } catch (error) {
+          console.error(error);
+        }
+      },
+    });
+  }
+
+  function handleRestoreAction() {
+    modals.openConfirmModal({
+      size: 'md',
+      title: 'Restaurar imagem',
+      centered: true,
+      children: (
+        <Text>
+          Tem certeza que deseja restaurar esta imagem da lixeira? Ela voltará
+          para a lista de imagens.
+        </Text>
+      ),
+      labels: {
+        confirm: 'Restaurar',
+        cancel: 'Cancelar',
+      },
+      onConfirm: async () => {
+        try {
+          await restoreImagesFromTrash([image.id]);
+          router.refresh();
+        } catch (error) {
+          console.error(error);
+        }
+      },
+    });
+  }
+
   return (
     <Card pb="sm">
       <CardSection>
@@ -83,15 +146,21 @@ export function ImageCard({
       </CardSection>
 
       <Group justify="space-between">
-        <Tooltip label="Excluir">
-          <ActionIcon variant="subtle">
+        <Tooltip
+          label={
+            image.movedToTrash
+              ? 'Excluir permanentemente'
+              : 'Mover para a lixeira'
+          }
+        >
+          <ActionIcon variant="subtle" onClick={handleDeleteAction}>
             <IconTrash />
           </ActionIcon>
         </Tooltip>
 
-        {withRestoreButton && (
+        {image.movedToTrash && (
           <Tooltip label="Restaurar">
-            <ActionIcon variant="subtle">
+            <ActionIcon variant="subtle" onClick={handleRestoreAction}>
               <IconRestore />
             </ActionIcon>
           </Tooltip>
