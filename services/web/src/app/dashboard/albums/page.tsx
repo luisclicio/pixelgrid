@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Group, Stack, Title } from '@mantine/core';
+import { Autocomplete, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { IconFolderPlus, IconSearch } from '@tabler/icons-react';
 
 import { listUserAlbums } from '@/actions/albums';
@@ -41,21 +41,29 @@ export default async function DashboardAlbums() {
       <Stack gap="xs">
         <Title order={2}>Álbuns</Title>
 
-        <AlbumCardGrid>
-          {userAlbums.map((album) => (
-            <AlbumCard key={album.id} album={album} />
-          ))}
-        </AlbumCardGrid>
+        {userAlbums.length > 0 ? (
+          <AlbumCardGrid>
+            {userAlbums.map((album) => (
+              <AlbumCard key={album.id} album={album} />
+            ))}
+          </AlbumCardGrid>
+        ) : (
+          <Text c="dimmed">Nenhum álbum encontrado.</Text>
+        )}
       </Stack>
 
       <Stack gap="xs" mt="xs">
         <Title order={2}>Tags</Title>
 
-        <TagCardGrid>
-          {userTags.map((tag) => (
-            <TagCard key={tag.id} tag={tag} />
-          ))}
-        </TagCardGrid>
+        {userTags.length > 0 ? (
+          <TagCardGrid>
+            {userTags.map((tag) => (
+              <TagCard key={tag.id} tag={tag} />
+            ))}
+          </TagCardGrid>
+        ) : (
+          <Text c="dimmed">Nenhuma tag encontrada.</Text>
+        )}
       </Stack>
     </Stack>
   );

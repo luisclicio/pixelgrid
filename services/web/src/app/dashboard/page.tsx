@@ -1,4 +1,4 @@
-import { Group, MultiSelect, Stack } from '@mantine/core';
+import { Group, MultiSelect, Stack, Text } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 
 import { listUserImages } from '@/actions/images';
@@ -29,11 +29,15 @@ export default async function DashboardHome() {
         <RefreshPageButton />
       </Group>
 
-      <ImageCardGrid>
-        {userImages.map((image) => (
-          <ImageCard key={image.id} image={image} />
-        ))}
-      </ImageCardGrid>
+      {userImages.length > 0 ? (
+        <ImageCardGrid>
+          {userImages.map((image) => (
+            <ImageCard key={image.id} image={image} />
+          ))}
+        </ImageCardGrid>
+      ) : (
+        <Text c="dimmed">Nenhuma imagem encontrada.</Text>
+      )}
     </Stack>
   );
 }

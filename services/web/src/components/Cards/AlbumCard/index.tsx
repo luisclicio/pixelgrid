@@ -78,7 +78,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
       centered: true,
       children: (
         <Text>
-          Tem certeza que deseja restaurar esta álbum da lixeira? Ela voltará
+          Tem certeza que deseja restaurar este álbum da lixeira? Ela voltará
           para a lista de álbuns.
         </Text>
       ),
