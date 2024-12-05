@@ -9,9 +9,8 @@ import { AlbumCardGrid, AlbumCard } from '@/components/Cards/AlbumCard';
 import { ImageCardGrid, ImageCard } from '@/components/Cards/ImageCard';
 
 export default async function DashboardTrash() {
-  // TODO: loads the user's trashed albums and images
-  const userAlbums = await listUserAlbums({ onlyPublic: true });
-  const userImages = await listUserImages({ onlyPublic: true });
+  const userAlbums = await listUserAlbums({ trashFilter: 'ONLY_TRASHED' });
+  const userImages = await listUserImages({ trashFilter: 'ONLY_TRASHED' });
   const userTags = await listAvailableUserTags();
 
   return (
@@ -37,7 +36,11 @@ export default async function DashboardTrash() {
         <Group>
           <RefreshPageButton />
 
-          <Button color="red" leftSection={<IconTrashX />}>
+          <Button
+            color="red"
+            leftSection={<IconTrashX />}
+            disabled={userAlbums.length === 0 && userImages.length === 0}
+          >
             Esvaziar lixeira
           </Button>
         </Group>
@@ -53,7 +56,7 @@ export default async function DashboardTrash() {
             ))}
           </AlbumCardGrid>
         ) : (
-          <Text c="dimmed">Nenhum álbum compartilhado.</Text>
+          <Text c="dimmed">Nenhum álbum encontrado.</Text>
         )}
       </Stack>
 
@@ -67,7 +70,7 @@ export default async function DashboardTrash() {
             ))}
           </ImageCardGrid>
         ) : (
-          <Text c="dimmed">Nenhuma imagem compartilhada.</Text>
+          <Text c="dimmed">Nenhuma imagem encontrada.</Text>
         )}
       </Stack>
     </Stack>

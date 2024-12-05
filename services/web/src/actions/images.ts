@@ -14,6 +14,7 @@ import { amqpClient } from '@/services/amqp';
 
 export type ListUserImagesProps = {
   onlyPublic?: boolean;
+  trashFilter?: 'ALL' | 'ONLY_TRASHED' | 'NOT_TRASHED';
 };
 
 export async function saveImages(
@@ -71,6 +72,7 @@ export async function saveImages(
 
 export async function listUserImages({
   onlyPublic = false,
+  trashFilter = 'NOT_TRASHED',
 }: ListUserImagesProps = {}): Promise<Image[]> {
   const session = await auth();
 
@@ -82,6 +84,8 @@ export async function listUserImages({
     where: {
       ownerId: Number(session.user.id),
       ...(onlyPublic && { accessGrantType: 'PUBLIC' }),
+      ...(trashFilter === 'ONLY_TRASHED' && { movedToTrash: true }),
+      ...(trashFilter === 'NOT_TRASHED' && { movedToTrash: false }),
     },
     include: {
       tags: true,
