@@ -44,7 +44,7 @@ model Image {
   ownerId         Int                     @map("owner_id")
 
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  albuns    Album[]    @relation("albuns_images") // Implicit many-to-many relation
+  albums    Album[]    @relation("albums_images") // Implicit many-to-many relation
   tags      Tag[]      @relation("images_tags") // Implicit many-to-many relation
   favorites Favorite[]
 
@@ -60,7 +60,7 @@ model Album {
   ownerId         Int                     @map("owner_id")
 
   owner  User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  images Image[] @relation("albuns_images") // Implicit many-to-many relation
+  images Image[] @relation("albums_images") // Implicit many-to-many relation
 
   @@map("albums")
 }
