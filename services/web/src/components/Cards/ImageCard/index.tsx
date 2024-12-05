@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation';
 
 import type { Image } from '@/types';
 import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
+import { toggleFavoriteImage } from '@/actions/favorites';
 
 export type ImageCardProps = {
   image: Image;
@@ -34,6 +35,14 @@ export type ImageCardProps = {
 
 export function ImageCard({ image }: ImageCardProps) {
   const router = useRouter();
+
+  async function handleFavoriteAction() {
+    const result = await toggleFavoriteImage(image.id);
+
+    if (result.status === 'SUCCESS') {
+      router.refresh();
+    }
+  }
 
   function handleDeleteAction() {
     modals.openConfirmModal({
@@ -185,7 +194,11 @@ export function ImageCard({ image }: ImageCardProps) {
         </Tooltip>
 
         <Tooltip label="Favoritar">
-          <ActionIcon variant="subtle" c={image.favorite ? 'red' : undefined}>
+          <ActionIcon
+            variant="subtle"
+            c={image.favorite ? 'red' : undefined}
+            onClick={handleFavoriteAction}
+          >
             {image.favorite ? <IconHeartFilled /> : <IconHeart />}
           </ActionIcon>
         </Tooltip>

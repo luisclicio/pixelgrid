@@ -33,3 +33,8 @@ export type Image = PrismaImage & {
 };
 
 export type Album = PrismaAlbum;
+
+export type ServerActionResult<T = unknown> = {
+  status: 'SUCCESS' | 'ERROR';
+  data?: T | null;
+};
