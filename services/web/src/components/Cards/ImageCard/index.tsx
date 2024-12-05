@@ -8,6 +8,7 @@ import {
   IconRestore,
   IconShare,
   IconTrash,
+  IconX,
 } from '@tabler/icons-react';
 import {
   Card,
@@ -23,11 +24,13 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 
 import type { Image } from '@/types';
 import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
 import { toggleFavoriteImage } from '@/actions/favorites';
+import { downloadFile } from '@/libs/browser';
 
 export type ImageCardProps = {
   image: Image;
@@ -41,6 +44,25 @@ export function ImageCard({ image }: ImageCardProps) {
 
     if (result.status === 'SUCCESS') {
       router.refresh();
+    }
+  }
+
+  async function handleDownloadAction() {
+    if (!image.url) {
+      return;
+    }
+
+    try {
+      await downloadFile(image.url, image.metadata?.name);
+    } catch (error) {
+      console.error(error);
+
+      notifications.show({
+        title: 'Erro ao baixar imagem',
+        message: 'Ocorreu um erro ao baixar a imagem. Tente novamente.',
+        color: 'red',
+        icon: <IconX />,
+      });
     }
   }
 
@@ -188,7 +210,7 @@ export function ImageCard({ image }: ImageCardProps) {
         </Tooltip>
 
         <Tooltip label="Baixar">
-          <ActionIcon variant="subtle">
+          <ActionIcon variant="subtle" onClick={handleDownloadAction}>
             <IconDownload />
           </ActionIcon>
         </Tooltip>
