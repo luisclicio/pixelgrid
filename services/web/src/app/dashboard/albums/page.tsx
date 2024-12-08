@@ -4,6 +4,7 @@ import { IconFolderPlus, IconSearch } from '@tabler/icons-react';
 import { listUserAlbums } from '@/actions/albums';
 import { listAvailableUserTags } from '@/actions/tags';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
+import { openCreateAlbumModal } from '@/components/Modals/CreateAlbumModal';
 import { AlbumCard, AlbumCardGrid } from '@/components/Cards/AlbumCard';
 import { TagCard, TagCardGrid } from '@/components/Cards/TagCard';
 
@@ -19,11 +20,15 @@ export default async function DashboardAlbums() {
           data={[
             {
               group: 'Álbuns',
-              items: userAlbums.map((album) => album.title),
+              items: Array.from(
+                new Set(userAlbums.map((album) => album.title))
+              ),
             },
             {
               group: 'Tags',
-              items: userTags.map((tag) => tag.label ?? tag.key),
+              items: Array.from(
+                new Set(userTags.map((tag) => tag.label ?? tag.key))
+              ),
             },
           ]}
           leftSection={<IconSearch size={20} />}
@@ -34,7 +39,12 @@ export default async function DashboardAlbums() {
         <Group>
           <RefreshPageButton />
 
-          <Button leftSection={<IconFolderPlus />}>Novo álbum</Button>
+          <Button
+            leftSection={<IconFolderPlus />}
+            onClick={openCreateAlbumModal}
+          >
+            Novo álbum
+          </Button>
         </Group>
       </Group>
 

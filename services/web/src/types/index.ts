@@ -8,6 +8,7 @@ import {
 import {
   loginSchema,
   registerSchema,
+  saveAlbumSchema,
   saveImagesSchema,
 } from '@/libs/validation';
 
@@ -16,6 +17,8 @@ export type LoginSchema = z.infer<typeof loginSchema>;
 export type RegisterSchema = z.infer<typeof registerSchema>;
 
 export type SaveImagesSchema = z.infer<typeof saveImagesSchema>;
+
+export type SaveAlbumSchema = z.infer<typeof saveAlbumSchema>;
 
 export type Tag = PrismaTag;
 

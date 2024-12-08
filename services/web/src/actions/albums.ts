@@ -1,6 +1,6 @@
 'use server';
 
-import type { Album } from '@/types';
+import type { Album, SaveAlbumSchema, ServerActionResult } from '@/types';
 import { auth } from '@/services/auth';
 import { prisma } from '@/services/db';
 import { deleteImages } from './images';
@@ -9,6 +9,34 @@ export type ListUserAlbumsProps = {
   onlyPublic?: boolean;
   trashFilter?: 'ALL' | 'ONLY_TRASHED' | 'NOT_TRASHED';
 };
+
+export async function saveAlbum({
+  title,
+}: SaveAlbumSchema): Promise<ServerActionResult<Album>> {
+  try {
+    const session = await auth();
+
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
+
+    return {
+      status: 'SUCCESS',
+      data: await prisma.album.create({
+        data: {
+          title,
+          ownerId: Number(session.user.id),
+        },
+      }),
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      status: 'ERROR',
+    };
+  }
+}
 
 export async function listUserAlbums({
   onlyPublic = false,

@@ -27,6 +27,7 @@ export async function saveImages(
     throw new Error('User not authenticated');
   }
 
+  const albumId = formData.get('albumId') as SaveImagesSchema['albumId'];
   const files = formData.getAll('files') as SaveImagesSchema['files'];
   const userUploadsFolder = `images/${session.user.id}`;
 
@@ -42,21 +43,30 @@ export async function saveImages(
     throw new Error('No images saved');
   }
 
-  const imagesData = await prisma.image.createManyAndReturn({
-    data: savedImages.map((image) => ({
-      key: image.key,
-      metadata: {
-        name: image.name,
-        size: image.size,
-        type: image.type,
-      },
-      ownerId: Number(session.user.id),
-    })),
-    select: {
-      id: true,
-      key: true,
-    },
-  });
+  const imagesData = await prisma.$transaction(
+    savedImages.map((image) =>
+      prisma.image.create({
+        data: {
+          key: image.key,
+          metadata: {
+            name: image.name,
+            size: image.size,
+            type: image.type,
+          },
+          ownerId: Number(session.user.id),
+          albums: {
+            connect: {
+              id: albumId,
+            },
+          },
+        },
+        select: {
+          id: true,
+          key: true,
+        },
+      })
+    )
+  );
 
   await Promise.all(
     imagesData.map((image) =>

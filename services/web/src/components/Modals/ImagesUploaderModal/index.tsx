@@ -23,13 +23,21 @@ import { Dropzone, MIME_TYPES } from '@mantine/dropzone';
 import { useForm, zodResolver } from '@mantine/form';
 import { useId } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { IconUpload, IconPhoto, IconX, IconCheck } from '@tabler/icons-react';
+import {
+  IconUpload,
+  IconPhoto,
+  IconX,
+  IconCheck,
+  IconFolderPlus,
+} from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 import type { SaveImagesSchema } from '@/types';
 import { saveImages } from '@/actions/images';
 import { saveImagesSchema } from '@/libs/validation';
+import { AlbumSelect } from '@/components/Selects/AlbumSelect';
+import { openCreateAlbumModal } from '../CreateAlbumModal';
 
 export const IMAGES_UPLOADER_MODAL_KEY = 'IMAGES_UPLOADER_MODAL_KEY';
 
@@ -83,6 +91,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
   const dropzoneId = useId();
   const form = useForm<SaveImagesSchema>({
     initialValues: {
+      albumId: '',
       files: selectedImagesStore.values.map(({ file }) => file),
     },
 
@@ -112,6 +121,7 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
     mutationFn: async (values: typeof form.values) => {
       const formData = new FormData();
 
+      formData.append('albumId', values.albumId);
       values.files.forEach((file) => formData.append('files', file));
 
       await saveImages(formData);
@@ -154,7 +164,23 @@ export function ImagesUploaderModal({ context, id }: ContextModalProps) {
     <>
       <form onSubmit={form.onSubmit(handleSubmit)} onReset={handleReset}>
         <Stack>
+          <Group align="flex-end" w="100%">
+            <AlbumSelect
+              withAsterisk
+              flex={1}
+              key={form.key('albumId')}
+              {...form.getInputProps('albumId')}
+            />
+            <Button
+              leftSection={<IconFolderPlus />}
+              onClick={openCreateAlbumModal}
+            >
+              Novo álbum
+            </Button>
+          </Group>
+
           <Input.Wrapper
+            label="Imagens"
             id={dropzoneId}
             withAsterisk
             error={form.errors.files}

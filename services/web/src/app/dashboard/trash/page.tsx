@@ -22,11 +22,15 @@ export default async function DashboardTrash() {
           data={[
             {
               group: 'Álbuns',
-              items: userAlbums.map((album) => album.title),
+              items: Array.from(
+                new Set(userAlbums.map((album) => album.title))
+              ),
             },
             {
               group: 'Tags',
-              items: userTags.map((tag) => tag.label ?? tag.key),
+              items: Array.from(
+                new Set(userTags.map((tag) => tag.label ?? tag.key))
+              ),
             },
           ]}
           leftSection={<IconSearch size={20} />}

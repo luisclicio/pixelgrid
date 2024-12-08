@@ -11,11 +11,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { ImagesUploaderModal } from '@/components/Modals/ImagesUploaderModal';
+import { CreateAlbumModal } from '@/components/Modals/CreateAlbumModal';
 
 import { theme } from './theme';
 
 const modals = {
   [ImagesUploaderModal.key]: ImagesUploaderModal,
+  [CreateAlbumModal.key]: CreateAlbumModal,
 };
 
 declare module '@mantine/modals' {

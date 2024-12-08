@@ -18,5 +18,14 @@ export const registerSchema = loginSchema.extend({
 });
 
 export const saveImagesSchema = z.object({
+  albumId: z
+    .string({ required_error: 'O álbum é obrigatório' })
+    .min(1, 'O álbum é obrigatório'),
   files: z.array(z.instanceof(File)).min(1, 'Selecione pelo menos uma imagem'),
+});
+
+export const saveAlbumSchema = z.object({
+  title: z
+    .string({ required_error: 'O título é obrigatório' })
+    .min(1, 'O título é obrigatório'),
 });

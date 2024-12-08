@@ -2,6 +2,7 @@
 
 import {
   ActionIcon,
+  Badge,
   Box,
   Card,
   Group,
@@ -108,6 +109,10 @@ export function AlbumCard({ album }: AlbumCardProps) {
           <Text truncate="end" style={{ flex: 1 }}>
             {album.title}
           </Text>
+
+          <Badge>
+            {album.accessGrantType === 'PRIVATE' ? 'Privado' : 'Público'}
+          </Badge>
         </Group>
       </Card>
 
