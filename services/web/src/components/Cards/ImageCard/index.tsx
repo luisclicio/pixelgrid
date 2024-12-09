@@ -230,5 +230,5 @@ export function ImageCard({ image }: ImageCardProps) {
 }
 
 export function ImageCardGrid({ children }: { children: React.ReactNode }) {
-  return <SimpleGrid cols={{ xs: 2, md: 3, xl: 4 }}>{children}</SimpleGrid>;
+  return <SimpleGrid cols={{ sm: 2, lg: 3, xl: 4 }}>{children}</SimpleGrid>;
 }

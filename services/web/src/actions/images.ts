@@ -1,6 +1,12 @@
 'use server';
 
-import type { SaveImagesSchema, Image, ImageMetadata } from '@/types';
+import type {
+  SaveImagesSchema,
+  Image,
+  ImageMetadata,
+  Album,
+  Tag,
+} from '@/types';
 import type { ClassifyActionPayload } from '@/classifier/actions/classify.action';
 import { auth } from '@/services/auth';
 import {
@@ -14,6 +20,8 @@ import { prisma } from '@/services/db';
 import { amqpClient } from '@/services/amqp';
 
 export type ListUserImagesProps = {
+  albumId?: Album['id'];
+  tagId?: Tag['id'];
   onlyPublic?: boolean;
   trashFilter?: 'ALL' | 'ONLY_TRASHED' | 'NOT_TRASHED';
 };
@@ -82,6 +90,8 @@ export async function saveImages(
 }
 
 export async function listUserImages({
+  albumId,
+  tagId,
   onlyPublic = false,
   trashFilter = 'NOT_TRASHED',
 }: ListUserImagesProps = {}): Promise<Image[]> {
@@ -94,6 +104,20 @@ export async function listUserImages({
   const images = await prisma.image.findMany({
     where: {
       ownerId: Number(session.user.id),
+      ...(albumId && {
+        albums: {
+          some: {
+            id: albumId,
+          },
+        },
+      }),
+      ...(tagId && {
+        tags: {
+          some: {
+            id: tagId,
+          },
+        },
+      }),
       ...(onlyPublic && { accessGrantType: 'PUBLIC' }),
       ...(trashFilter === 'ONLY_TRASHED' && { movedToTrash: true }),
       ...(trashFilter === 'NOT_TRASHED' && { movedToTrash: false }),
