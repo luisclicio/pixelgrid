@@ -31,6 +31,7 @@ import type { Image } from '@/types';
 import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
 import { toggleFavoriteImage } from '@/actions/favorites';
 import { downloadFile } from '@/libs/browser';
+import { openShareResourceModal } from '@/components/Modals/ShareResourceModal';
 
 export type ImageCardProps = {
   image: Image;
@@ -126,6 +127,17 @@ export function ImageCard({ image }: ImageCardProps) {
     });
   }
 
+  function handleShareAction() {
+    openShareResourceModal({
+      resource: {
+        type: 'image',
+        id: image.id,
+        name: image.metadata?.name,
+        accessGrantType: image.accessGrantType,
+      },
+    });
+  }
+
   return (
     <Card pb="sm">
       <CardSection>
@@ -198,7 +210,7 @@ export function ImageCard({ image }: ImageCardProps) {
         )}
 
         <Tooltip label="Compartilhar">
-          <ActionIcon variant="subtle">
+          <ActionIcon variant="subtle" onClick={handleShareAction}>
             <IconShare />
           </ActionIcon>
         </Tooltip>

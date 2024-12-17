@@ -26,6 +26,7 @@ import { modals } from '@mantine/modals';
 
 import type { Album } from '@/types';
 import { deleteAlbums, restoreAlbumsFromTrash } from '@/actions/albums';
+import { openShareResourceModal } from '@/components/Modals/ShareResourceModal';
 
 export type AlbumCardProps = {
   album: Album;
@@ -98,6 +99,17 @@ export function AlbumCard({ album }: AlbumCardProps) {
     });
   }
 
+  function handleShareAction() {
+    openShareResourceModal({
+      resource: {
+        type: 'album',
+        id: album.id,
+        name: album.title,
+        accessGrantType: album.accessGrantType,
+      },
+    });
+  }
+
   return (
     <Box pos="relative">
       <Card component={Link} href={`/dashboard/albums/${album.id}`} p="sm">
@@ -140,7 +152,10 @@ export function AlbumCard({ album }: AlbumCardProps) {
             Renomear
           </Menu.Item>
 
-          <Menu.Item leftSection={<IconShare size={18} />}>
+          <Menu.Item
+            leftSection={<IconShare size={18} />}
+            onClick={handleShareAction}
+          >
             Compartilhar
           </Menu.Item>
 

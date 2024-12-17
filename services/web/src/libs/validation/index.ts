@@ -29,3 +29,9 @@ export const saveAlbumSchema = z.object({
     .string({ required_error: 'O título é obrigatório' })
     .min(1, 'O título é obrigatório'),
 });
+
+export const changeResourceAccessSchema = z.object({
+  type: z.enum(['album', 'image']),
+  id: z.string(),
+  accessGrantType: z.enum(['PUBLIC', 'PRIVATE']),
+});

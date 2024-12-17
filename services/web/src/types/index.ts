@@ -6,6 +6,7 @@ import {
 } from '@prisma/client';
 
 import {
+  changeResourceAccessSchema,
   loginSchema,
   registerSchema,
   saveAlbumSchema,
@@ -19,6 +20,8 @@ export type RegisterSchema = z.infer<typeof registerSchema>;
 export type SaveImagesSchema = z.infer<typeof saveImagesSchema>;
 
 export type SaveAlbumSchema = z.infer<typeof saveAlbumSchema>;
+
+export type ChangeResourceAccess = z.infer<typeof changeResourceAccessSchema>;
 
 export type Tag = PrismaTag;
 

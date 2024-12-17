@@ -86,7 +86,10 @@ class SelectedImagesStore {
 
 const selectedImagesStore = new SelectedImagesStore();
 
-export function ImagesUploaderModal({ context, id }: ContextModalProps) {
+export function ImagesUploaderModal({
+  context,
+  id,
+}: ContextModalProps<Record<string, never>>) {
   const router = useRouter();
   const dropzoneId = useId();
   const form = useForm<SaveImagesSchema>({

@@ -39,6 +39,36 @@ export async function saveAlbum({
   }
 }
 
+export async function updateAlbum(
+  albumId: Album['id'],
+  data: Partial<Album>
+): Promise<ServerActionResult<Album>> {
+  try {
+    const session = await auth();
+
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
+
+    return {
+      status: 'SUCCESS',
+      data: await prisma.album.update({
+        where: {
+          id: albumId,
+          ownerId: Number(session.user.id),
+        },
+        data,
+      }),
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      status: 'ERROR',
+    };
+  }
+}
+
 export async function listUserAlbums({
   onlyPublic = false,
   trashFilter = 'NOT_TRASHED',

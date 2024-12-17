@@ -12,12 +12,14 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { ImagesUploaderModal } from '@/components/Modals/ImagesUploaderModal';
 import { CreateAlbumModal } from '@/components/Modals/CreateAlbumModal';
+import { ShareResourceModal } from '@/components/Modals/ShareResourceModal';
 
 import { theme } from './theme';
 
 const modals = {
   [ImagesUploaderModal.key]: ImagesUploaderModal,
   [CreateAlbumModal.key]: CreateAlbumModal,
+  [ShareResourceModal.key]: ShareResourceModal,
 };
 
 declare module '@mantine/modals' {

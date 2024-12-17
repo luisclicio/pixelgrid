@@ -18,7 +18,10 @@ import { saveAlbumSchema } from '@/libs/validation';
 
 export const CREATE_ALBUM_MODAL_KEY = 'CREATE_ALBUM_MODAL_KEY';
 
-export function CreateAlbumModal({ context, id }: ContextModalProps) {
+export function CreateAlbumModal({
+  context,
+  id,
+}: ContextModalProps<Record<string, never>>) {
   const router = useRouter();
   const form = useForm<SaveAlbumSchema>({
     initialValues: {

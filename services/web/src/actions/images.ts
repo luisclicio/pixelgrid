@@ -6,6 +6,7 @@ import type {
   ImageMetadata,
   Album,
   Tag,
+  ServerActionResult,
 } from '@/types';
 import type { ClassifyActionPayload } from '@/classifier/actions/classify.action';
 import { auth } from '@/services/auth';
@@ -88,6 +89,36 @@ export async function saveImages(
   );
 
   return storageSaveResult;
+}
+
+export async function updateImage(
+  imageId: Image['id'],
+  data: Partial<Omit<Image, 'tags' | 'favorite' | 'url'>>
+): Promise<ServerActionResult<Image>> {
+  try {
+    const session = await auth();
+
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
+
+    return {
+      status: 'SUCCESS',
+      data: (await prisma.image.update({
+        where: {
+          id: imageId,
+          ownerId: Number(session.user.id),
+        },
+        data,
+      })) as Image,
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      status: 'ERROR',
+    };
+  }
 }
 
 export async function listUserImages({
