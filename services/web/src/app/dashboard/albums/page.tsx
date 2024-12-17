@@ -1,39 +1,32 @@
-import { Autocomplete, Button, Group, Stack, Text, Title } from '@mantine/core';
-import { IconFolderPlus, IconSearch } from '@tabler/icons-react';
+import { Button, Group, Stack, Text, Title } from '@mantine/core';
+import { IconFolderPlus } from '@tabler/icons-react';
 
 import { listUserAlbums } from '@/actions/albums';
 import { listAvailableUserTags } from '@/actions/tags';
+import { SearchFilterInput } from '@/components/Inputs/SearchFilterInput';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
 import { openCreateAlbumModal } from '@/components/Modals/CreateAlbumModal';
 import { AlbumCard, AlbumCardGrid } from '@/components/Cards/AlbumCard';
 import { TagCard, TagCardGrid } from '@/components/Cards/TagCard';
 
-export default async function DashboardAlbums() {
-  const userAlbums = await listUserAlbums();
-  const userTags = await listAvailableUserTags();
+export default async function DashboardAlbums(props: {
+  searchParams: Promise<{ search?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const userAlbums = await listUserAlbums({
+    searchQuery: searchParams.search,
+  });
+  const userTags = await listAvailableUserTags({
+    searchQuery: searchParams.search,
+  });
 
   return (
     <Stack>
       <Group justify="space-between">
-        <Autocomplete
-          placeholder="Buscar álbuns ou tags..."
-          data={[
-            {
-              group: 'Álbuns',
-              items: Array.from(
-                new Set(userAlbums.map((album) => album.title))
-              ),
-            },
-            {
-              group: 'Tags',
-              items: Array.from(
-                new Set(userTags.map((tag) => tag.label ?? tag.key))
-              ),
-            },
-          ]}
-          leftSection={<IconSearch size={20} />}
-          maw={800}
-          style={{ flex: 1 }}
+        <SearchFilterInput
+          placeholder="Busque por álbuns ou tags..."
+          albums={userAlbums}
+          tags={userTags}
         />
 
         <Group>

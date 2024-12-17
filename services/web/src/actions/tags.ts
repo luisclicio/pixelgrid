@@ -4,7 +4,17 @@ import { auth } from '@/services/auth';
 import { prisma } from '@/services/db';
 import { Tag } from '@/types';
 
-export async function listAvailableUserTags() {
+export type ListAvailableUserTagsProps = {
+  searchQuery?: string;
+};
+
+export type ListAllUserTagsProps = {
+  searchQuery?: string;
+};
+
+export async function listAvailableUserTags({
+  searchQuery,
+}: ListAvailableUserTagsProps = {}) {
   const session = await auth();
 
   if (!session) {
@@ -18,6 +28,22 @@ export async function listAvailableUserTags() {
           ownerId: Number(session.user.id),
         },
       },
+      ...(searchQuery && {
+        OR: [
+          {
+            key: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            label: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      }),
     },
     orderBy: {
       key: 'asc',
@@ -25,7 +51,9 @@ export async function listAvailableUserTags() {
   });
 }
 
-export async function listAllUserTags() {
+export async function listAllUserTags({
+  searchQuery,
+}: ListAllUserTagsProps = {}) {
   const session = await auth();
 
   if (!session) {
@@ -42,6 +70,22 @@ export async function listAllUserTags() {
           ownerId: null,
         },
       ],
+      ...(searchQuery && {
+        OR: [
+          {
+            key: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            label: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      }),
     },
     orderBy: {
       key: 'asc',

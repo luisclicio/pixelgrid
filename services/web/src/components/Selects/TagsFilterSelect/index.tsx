@@ -31,7 +31,7 @@ export function TagsFilterSelect({
   const selectedTags: Tag['key'][] =
     searchParams.get('tags')?.split(';;') ?? [];
 
-  function handleSelectChange(value: Tag['key'][]) {
+  function handleValueChange(value: Tag['key'][]) {
     const params = new URLSearchParams(searchParams);
 
     if (value.length > 0) {
@@ -57,7 +57,7 @@ export function TagsFilterSelect({
       searchable
       clearable
       value={selectedTags}
-      onChange={handleSelectChange}
+      onChange={handleValueChange}
       leftSection={<IconSearch size={20} />}
       maw={props?.maw ?? 800}
       style={{ flex: 1, ...props.style }}

@@ -8,6 +8,7 @@ import { deleteImages } from './images';
 export type ListUserAlbumsProps = {
   onlyPublic?: boolean;
   trashFilter?: 'ALL' | 'ONLY_TRASHED' | 'NOT_TRASHED';
+  searchQuery?: string;
 };
 
 export async function saveAlbum({
@@ -41,6 +42,7 @@ export async function saveAlbum({
 export async function listUserAlbums({
   onlyPublic = false,
   trashFilter = 'NOT_TRASHED',
+  searchQuery,
 }: ListUserAlbumsProps = {}) {
   const session = await auth();
 
@@ -54,6 +56,12 @@ export async function listUserAlbums({
       ...(onlyPublic && { accessGrantType: 'PUBLIC' }),
       ...(trashFilter === 'ONLY_TRASHED' && { movedToTrash: true }),
       ...(trashFilter === 'NOT_TRASHED' && { movedToTrash: false }),
+      ...(searchQuery && {
+        title: {
+          contains: searchQuery,
+          mode: 'insensitive',
+        },
+      }),
     },
     orderBy: {
       title: 'asc',
