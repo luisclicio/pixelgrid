@@ -1,20 +1,23 @@
-import { Badge, Group, MultiSelect, Stack, Text, Title } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { Badge, Group, Stack, Text, Title } from '@mantine/core';
 
 import { getAlbum } from '@/actions/albums';
 import { listUserImages } from '@/actions/images';
 import { listAvailableUserTags } from '@/actions/tags';
 import { ImageCard, ImageCardGrid } from '@/components/Cards/ImageCard';
+import { TagsFilterSelect } from '@/components/Selects/TagsFilterSelect';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
 import { BackButton } from '@/components/Buttons/BackButton';
 
-export default async function DashboardAlbum({
-  params,
-}: {
+export default async function DashboardAlbum(props: {
   params: { albumId: string };
+  searchParams?: Promise<{ tags?: string }>;
 }) {
-  const album = await getAlbum(params.albumId);
-  const userImages = await listUserImages({ albumId: params.albumId });
+  const searchParams = await props.searchParams;
+  const album = await getAlbum(props.params.albumId);
+  const userImages = await listUserImages({
+    albumId: props.params.albumId,
+    tagsKeys: searchParams?.tags?.split(';;').filter(Boolean),
+  });
   const userTags = await listAvailableUserTags();
 
   return (
@@ -31,18 +34,7 @@ export default async function DashboardAlbum({
       </Group>
 
       <Group justify="space-between">
-        <MultiSelect
-          placeholder="Filtre as imagens pelo que há nelas..."
-          data={userTags.map((tag) => ({
-            value: tag.key,
-            label: tag.label ?? tag.key,
-          }))}
-          clearable
-          searchable
-          leftSection={<IconSearch size={20} />}
-          maw={800}
-          style={{ flex: 1 }}
-        />
+        <TagsFilterSelect tags={userTags} withReplace />
 
         <RefreshPageButton />
       </Group>

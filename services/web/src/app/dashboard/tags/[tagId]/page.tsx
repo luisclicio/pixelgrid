@@ -1,50 +1,33 @@
-import { Group, MultiSelect, Stack, Text, Title, Tooltip } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { Group, Stack, Text, Title, Tooltip } from '@mantine/core';
 
 import { listUserImages } from '@/actions/images';
-import { getTag, listAvailableUserTags } from '@/actions/tags';
+import { getTag } from '@/actions/tags';
 import { ImageCard, ImageCardGrid } from '@/components/Cards/ImageCard';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
 import { BackButton } from '@/components/Buttons/BackButton';
 
-export default async function DashboardTag({
-  params,
-}: {
+export default async function DashboardTag(props: {
   params: { tagId: string };
 }) {
-  const tag = await getTag(params.tagId);
-  const userImages = await listUserImages({ tagId: params.tagId });
-  const userTags = await listAvailableUserTags();
+  const tag = await getTag(props.params.tagId);
+  const userImages = await listUserImages({ tagsIds: [props.params.tagId] });
 
   return (
     <Stack>
-      <Group>
-        <BackButton />
-
-        <Group gap="xs">
-          <Tooltip label={tag?.key}>
-            <Title maw={300}>
-              <Text truncate="end" inherit>
-                {tag?.label || tag?.key}
-              </Text>
-            </Title>
-          </Tooltip>
-        </Group>
-      </Group>
-
       <Group justify="space-between">
-        <MultiSelect
-          placeholder="Filtre as imagens pelo que há nelas..."
-          data={userTags.map((tag) => ({
-            value: tag.key,
-            label: tag.label ?? tag.key,
-          }))}
-          clearable
-          searchable
-          leftSection={<IconSearch size={20} />}
-          maw={800}
-          style={{ flex: 1 }}
-        />
+        <Group>
+          <BackButton />
+
+          <Group gap="xs">
+            <Tooltip label={tag?.key}>
+              <Title maw={300}>
+                <Text truncate="end" inherit>
+                  {tag?.label || tag?.key}
+                </Text>
+              </Title>
+            </Tooltip>
+          </Group>
+        </Group>
 
         <RefreshPageButton />
       </Group>

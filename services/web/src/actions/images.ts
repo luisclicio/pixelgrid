@@ -21,7 +21,8 @@ import { amqpClient } from '@/services/amqp';
 
 export type ListUserImagesProps = {
   albumId?: Album['id'];
-  tagId?: Tag['id'];
+  tagsIds?: Tag['id'][];
+  tagsKeys?: Tag['key'][];
   onlyPublic?: boolean;
   trashFilter?: 'ALL' | 'ONLY_TRASHED' | 'NOT_TRASHED';
 };
@@ -91,7 +92,8 @@ export async function saveImages(
 
 export async function listUserImages({
   albumId,
-  tagId,
+  tagsIds = [],
+  tagsKeys = [],
   onlyPublic = false,
   trashFilter = 'NOT_TRASHED',
 }: ListUserImagesProps = {}): Promise<Image[]> {
@@ -111,16 +113,23 @@ export async function listUserImages({
           },
         },
       }),
-      ...(tagId && {
-        tags: {
-          some: {
-            id: tagId,
-          },
-        },
-      }),
       ...(onlyPublic && { accessGrantType: 'PUBLIC' }),
       ...(trashFilter === 'ONLY_TRASHED' && { movedToTrash: true }),
       ...(trashFilter === 'NOT_TRASHED' && { movedToTrash: false }),
+      tags: {
+        some: {
+          ...(tagsIds?.length > 0 && {
+            id: {
+              in: tagsIds,
+            },
+          }),
+          ...(tagsKeys?.length > 0 && {
+            key: {
+              in: tagsKeys,
+            },
+          }),
+        },
+      },
     },
     include: {
       tags: true,

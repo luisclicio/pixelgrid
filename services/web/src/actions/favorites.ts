@@ -1,11 +1,17 @@
 'use server';
 
-import type { Image, ImageMetadata, ServerActionResult } from '@/types';
+import type { Image, ImageMetadata, ServerActionResult, Tag } from '@/types';
 import { auth } from '@/services/auth';
 import { storage } from '@/services/storage';
 import { prisma } from '@/services/db';
 
-export async function listFavoritesUserImages(): Promise<Image[]> {
+export type ListFavoritesUserImagesProps = {
+  tagsKeys?: Tag['key'][];
+};
+
+export async function listFavoritesUserImages({
+  tagsKeys = [],
+}: ListFavoritesUserImagesProps = {}): Promise<Image[]> {
   const session = await auth();
 
   if (!session) {
@@ -18,6 +24,15 @@ export async function listFavoritesUserImages(): Promise<Image[]> {
       favorites: {
         some: {
           userId: Number(session.user.id),
+        },
+      },
+      tags: {
+        some: {
+          ...(tagsKeys?.length > 0 && {
+            key: {
+              in: tagsKeys,
+            },
+          }),
         },
       },
       OR: [

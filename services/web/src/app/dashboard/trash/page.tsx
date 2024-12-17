@@ -1,42 +1,29 @@
-import { Stack, Group, Autocomplete, Title, Text } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { Stack, Group, Title, Text } from '@mantine/core';
 
 import { listUserAlbums } from '@/actions/albums';
 import { listUserImages } from '@/actions/images';
 import { listAvailableUserTags } from '@/actions/tags';
+import { TagsFilterSelect } from '@/components/Selects/TagsFilterSelect';
 import { RefreshPageButton } from '@/components/Buttons/RefreshPageButton';
 import { EmptyTrashButton } from '@/components/Buttons/EmptyTrashButton';
 import { AlbumCardGrid, AlbumCard } from '@/components/Cards/AlbumCard';
 import { ImageCardGrid, ImageCard } from '@/components/Cards/ImageCard';
 
-export default async function DashboardTrash() {
+export default async function DashboardTrash(props: {
+  searchParams?: Promise<{ tags?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   const userAlbums = await listUserAlbums({ trashFilter: 'ONLY_TRASHED' });
-  const userImages = await listUserImages({ trashFilter: 'ONLY_TRASHED' });
+  const userImages = await listUserImages({
+    trashFilter: 'ONLY_TRASHED',
+    tagsKeys: searchParams?.tags?.split(';;').filter(Boolean),
+  });
   const userTags = await listAvailableUserTags();
 
   return (
     <Stack>
       <Group justify="space-between">
-        <Autocomplete
-          placeholder="Buscar álbuns ou tags..."
-          data={[
-            {
-              group: 'Álbuns',
-              items: Array.from(
-                new Set(userAlbums.map((album) => album.title))
-              ),
-            },
-            {
-              group: 'Tags',
-              items: Array.from(
-                new Set(userTags.map((tag) => tag.label ?? tag.key))
-              ),
-            },
-          ]}
-          leftSection={<IconSearch size={20} />}
-          maw={800}
-          style={{ flex: 1 }}
-        />
+        <TagsFilterSelect tags={userTags} />
 
         <Group>
           <RefreshPageButton />
