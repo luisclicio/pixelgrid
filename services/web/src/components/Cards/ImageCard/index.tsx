@@ -22,17 +22,18 @@ import {
   Divider,
   SimpleGrid,
   Tooltip,
+  Stack,
 } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import type { Image } from '@/types';
 import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
 import { toggleFavoriteImage } from '@/actions/favorites';
 import { downloadFile } from '@/libs/browser';
 import { openShareResourceModal } from '@/components/Modals/ShareResourceModal';
-import { useSession } from 'next-auth/react';
 
 export type ImageCardProps = {
   image: Image;
@@ -142,6 +143,87 @@ export function ImageCard({ image }: ImageCardProps) {
     });
   }
 
+  function handleViewDetailsAction() {
+    modals.open({
+      title: 'Detalhes da imagem',
+      children: (
+        <Stack gap="sm">
+          <MantineImage
+            src={image.url}
+            alt={image.metadata?.name ?? ''}
+            mah={580}
+            fit="contain"
+            mx="auto"
+            radius="md"
+          />
+
+          <Group justify="space-between" gap="xs">
+            <Text fz="lg" fw="bold" style={{ flex: 1 }}>
+              {image.metadata?.name ?? 'Sem título'}
+            </Text>
+
+            <Badge>
+              {image.accessGrantType === 'PRIVATE' ? 'Privado' : 'Público'}
+            </Badge>
+          </Group>
+
+          <Divider />
+
+          <Stack gap={0}>
+            <Text fz="sm" fw="bold">
+              Tamanho:
+            </Text>
+            <Text>
+              {new Intl.NumberFormat('en', {
+                notation: 'compact',
+                style: 'unit',
+                unit: 'byte',
+                unitDisplay: 'narrow',
+              }).format(image.metadata?.size ?? 0)}
+            </Text>
+          </Stack>
+
+          <Stack gap={0}>
+            <Text fz="sm" fw="bold">
+              Criada em:
+            </Text>
+            <Text>
+              {new Intl.DateTimeFormat(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'medium',
+              }).format(new Date(image.createdAt))}
+            </Text>
+          </Stack>
+
+          <Stack gap={0}>
+            <Text fz="sm" fw="bold">
+              Atualizada em:
+            </Text>
+            <Text>
+              {new Intl.DateTimeFormat(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'medium',
+              }).format(new Date(image.updatedAt))}
+            </Text>
+          </Stack>
+
+          {image.tags.length > 0 && (
+            <Stack gap={4}>
+              <Text fz="sm" fw="bold">
+                Tags:
+              </Text>
+              <Group gap={8}>
+                {image.tags.map((tag) => (
+                  <Badge key={tag.id}>{tag.label ?? tag.key}</Badge>
+                ))}
+              </Group>
+            </Stack>
+          )}
+        </Stack>
+      ),
+    });
+  }
+
   return (
     <Card pb="sm">
       <CardSection>
@@ -224,7 +306,7 @@ export function ImageCard({ image }: ImageCardProps) {
         )}
 
         <Tooltip label="Ver detalhes">
-          <ActionIcon variant="subtle">
+          <ActionIcon variant="subtle" onClick={handleViewDetailsAction}>
             <IconInfoCircle />
           </ActionIcon>
         </Tooltip>
