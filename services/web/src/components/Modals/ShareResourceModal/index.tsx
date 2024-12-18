@@ -112,7 +112,9 @@ export function ShareResourceModal({
 
         <Group justify="space-between">
           <CopyButton
-            value={`${window.location.origin}/shared/${resource.type}/${resource.id}`}
+            value={`${window.location.origin}/shared/${
+              resource.type === 'album' ? 'albums' : 'images'
+            }/${resource.id}`}
           >
             {({ copied, copy }) => (
               <Button

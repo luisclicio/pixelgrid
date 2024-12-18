@@ -20,13 +20,16 @@ import {
 import { prisma } from '@/services/db';
 import { amqpClient } from '@/services/amqp';
 
-export type ListUserImagesProps = {
+export type ListImagesProps = {
+  userId?: number;
   albumId?: Album['id'];
   tagsIds?: Tag['id'][];
   tagsKeys?: Tag['key'][];
   onlyPublic?: boolean;
   trashFilter?: 'ALL' | 'ONLY_TRASHED' | 'NOT_TRASHED';
 };
+
+export type ListUserImagesProps = Omit<ListImagesProps, 'userId'>;
 
 export async function saveImages(
   formData: FormData
@@ -121,22 +124,17 @@ export async function updateImage(
   }
 }
 
-export async function listUserImages({
+export async function listImages({
+  userId,
   albumId,
   tagsIds = [],
   tagsKeys = [],
   onlyPublic = false,
   trashFilter = 'NOT_TRASHED',
-}: ListUserImagesProps = {}): Promise<Image[]> {
-  const session = await auth();
-
-  if (!session) {
-    throw new Error('User not authenticated');
-  }
-
+}: ListImagesProps = {}): Promise<Image[]> {
   const images = await prisma.image.findMany({
     where: {
-      ownerId: Number(session.user.id),
+      ownerId: userId,
       ...(albumId && {
         albums: {
           some: {
@@ -166,7 +164,7 @@ export async function listUserImages({
       tags: true,
       favorites: {
         where: {
-          userId: Number(session.user.id),
+          userId: userId,
         },
         select: {
           userId: true,
@@ -186,6 +184,29 @@ export async function listUserImages({
       favorite: favorites.length > 0,
     }))
   );
+}
+
+export async function listUserImages({
+  albumId,
+  tagsIds = [],
+  tagsKeys = [],
+  onlyPublic = false,
+  trashFilter = 'NOT_TRASHED',
+}: ListUserImagesProps = {}): Promise<Image[]> {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+
+  return listImages({
+    userId: Number(session.user.id),
+    albumId,
+    tagsIds,
+    tagsKeys,
+    onlyPublic,
+    trashFilter,
+  });
 }
 
 export async function deleteImages(

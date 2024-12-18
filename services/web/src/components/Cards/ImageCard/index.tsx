@@ -32,6 +32,7 @@ import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
 import { toggleFavoriteImage } from '@/actions/favorites';
 import { downloadFile } from '@/libs/browser';
 import { openShareResourceModal } from '@/components/Modals/ShareResourceModal';
+import { useSession } from 'next-auth/react';
 
 export type ImageCardProps = {
   image: Image;
@@ -39,6 +40,9 @@ export type ImageCardProps = {
 
 export function ImageCard({ image }: ImageCardProps) {
   const router = useRouter();
+  const session = useSession();
+
+  const userIsOwner = Number(session?.data?.user?.id) === image.ownerId;
 
   async function handleFavoriteAction() {
     const result = await toggleFavoriteImage(image.id);
@@ -189,19 +193,21 @@ export function ImageCard({ image }: ImageCardProps) {
       </CardSection>
 
       <Group justify="space-between">
-        <Tooltip
-          label={
-            image.movedToTrash
-              ? 'Excluir permanentemente'
-              : 'Mover para a lixeira'
-          }
-        >
-          <ActionIcon variant="subtle" onClick={handleDeleteAction}>
-            <IconTrash />
-          </ActionIcon>
-        </Tooltip>
+        {userIsOwner && (
+          <Tooltip
+            label={
+              image.movedToTrash
+                ? 'Excluir permanentemente'
+                : 'Mover para a lixeira'
+            }
+          >
+            <ActionIcon variant="subtle" onClick={handleDeleteAction}>
+              <IconTrash />
+            </ActionIcon>
+          </Tooltip>
+        )}
 
-        {image.movedToTrash && (
+        {userIsOwner && image.movedToTrash && (
           <Tooltip label="Restaurar">
             <ActionIcon variant="subtle" onClick={handleRestoreAction}>
               <IconRestore />
@@ -209,11 +215,13 @@ export function ImageCard({ image }: ImageCardProps) {
           </Tooltip>
         )}
 
-        <Tooltip label="Compartilhar">
-          <ActionIcon variant="subtle" onClick={handleShareAction}>
-            <IconShare />
-          </ActionIcon>
-        </Tooltip>
+        {userIsOwner && (
+          <Tooltip label="Compartilhar">
+            <ActionIcon variant="subtle" onClick={handleShareAction}>
+              <IconShare />
+            </ActionIcon>
+          </Tooltip>
+        )}
 
         <Tooltip label="Ver detalhes">
           <ActionIcon variant="subtle">
@@ -227,15 +235,17 @@ export function ImageCard({ image }: ImageCardProps) {
           </ActionIcon>
         </Tooltip>
 
-        <Tooltip label="Favoritar">
-          <ActionIcon
-            variant="subtle"
-            c={image.favorite ? 'red' : undefined}
-            onClick={handleFavoriteAction}
-          >
-            {image.favorite ? <IconHeartFilled /> : <IconHeart />}
-          </ActionIcon>
-        </Tooltip>
+        {userIsOwner && (
+          <Tooltip label="Favoritar">
+            <ActionIcon
+              variant="subtle"
+              c={image.favorite ? 'red' : undefined}
+              onClick={handleFavoriteAction}
+            >
+              {image.favorite ? <IconHeartFilled /> : <IconHeart />}
+            </ActionIcon>
+          </Tooltip>
+        )}
       </Group>
     </Card>
   );

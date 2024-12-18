@@ -2,9 +2,14 @@
 
 import { auth } from '@/services/auth';
 import { prisma } from '@/services/db';
-import { Tag } from '@/types';
+import { Album, Tag } from '@/types';
 
 export type ListAvailableUserTagsProps = {
+  searchQuery?: string;
+};
+
+export type ListAvailableAlbumTagsProps = {
+  albumId: Album['id'];
   searchQuery?: string;
 };
 
@@ -26,6 +31,44 @@ export async function listAvailableUserTags({
       images: {
         some: {
           ownerId: Number(session.user.id),
+        },
+      },
+      ...(searchQuery && {
+        OR: [
+          {
+            key: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            label: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      }),
+    },
+    orderBy: {
+      key: 'asc',
+    },
+  });
+}
+
+export async function listAvailableAlbumTags({
+  albumId,
+  searchQuery,
+}: ListAvailableAlbumTagsProps) {
+  return await prisma.tag.findMany({
+    where: {
+      images: {
+        some: {
+          albums: {
+            some: {
+              id: albumId,
+            },
+          },
         },
       },
       ...(searchQuery && {

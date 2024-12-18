@@ -100,16 +100,9 @@ export async function listUserAlbums({
 }
 
 export async function getAlbum(albumId: Album['id']) {
-  const session = await auth();
-
-  if (!session) {
-    throw new Error('User not authenticated');
-  }
-
   return await prisma.album.findFirst({
     where: {
       id: albumId,
-      ownerId: Number(session.user.id),
     },
   });
 }
