@@ -209,6 +209,38 @@ export async function listUserImages({
   });
 }
 
+export async function getImage(imageId: Image['id']): Promise<Image | null> {
+  const session = await auth();
+
+  const image = await prisma.image.findFirst({
+    where: {
+      id: imageId,
+    },
+    include: {
+      tags: true,
+      favorites: {
+        where: {
+          userId: session ? Number(session?.user.id) : undefined,
+        },
+        select: {
+          userId: true,
+        },
+      },
+    },
+  });
+
+  if (!image) {
+    return null;
+  }
+
+  return {
+    ...image,
+    metadata: image.metadata as ImageMetadata,
+    url: await storage.getSignedUrl(image.key, { expiresIn: '30m' }),
+    favorite: image.favorites.length > 0,
+  };
+}
+
 export async function deleteImages(
   imageIds: Image['id'][],
   { onlyMoveToTrash = true } = {}
