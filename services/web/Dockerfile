@@ -38,22 +38,18 @@ RUN pnpm build && pnpm prune --prod
 # Production base image
 FROM base AS production-base
 ENV NODE_ENV=production
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/prisma/migrations /app/prisma/migrations
+COPY --from=builder /app/prisma/seed /app/prisma/seed
 COPY --from=builder /app/prisma/schema.prisma /app/prisma/
 
 # Web app stage (Next.js)
 FROM production-base AS web-production
 COPY --from=builder /app/public /app/public
-# Set the correct permission for prerender cache
 RUN mkdir .next
-RUN chown nextjs:nodejs .next
 # Automatically leverage output traces to reduce image size (https://nextjs.org/docs/advanced-features/output-file-tracing)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone /app
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static /app/.next/static
-USER nextjs
+COPY --from=builder /app/.next/standalone /app
+COPY --from=builder /app/.next/static /app/.next/static
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
@@ -62,7 +58,7 @@ ENV AUTH_TRUST_HOST=true
 CMD ["node", "server.js"]
 
 # Classifier stage
-FROM production-base AS classifier-production
-COPY --from=builder /app/src/classifier /app/src/classifier
-USER nextjs
+FROM dependencies AS classifier-production
+ENV NODE_ENV=production
+COPY . /app
 CMD ["pnpm", "classifier:start"]

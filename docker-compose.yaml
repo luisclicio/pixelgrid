@@ -1,19 +1,61 @@
 volumes:
   database_data:
   storage_data:
+  broker_data:
+
+networks:
+  storage_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 180.25.0.0/16
+          gateway: 180.25.0.1
 
 services:
   app:
     image: pixelgrid/app:latest
     build:
       context: ./services/web
-      target: production
+      target: web-production
     env_file:
       - ./services/web/.env
+    environment:
+      - STORAGE_S3_ENDPOINT=http://180.25.0.2:9000
     ports:
       - 3000:3000
+    networks:
+      default:
+      storage_net:
+        ipv4_address: 180.25.0.3
     depends_on:
-      - database
+      database:
+        condition: service_started
+      storage:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+        restart: true
+
+  app-classifier:
+    build:
+      context: ./services/web
+      target: classifier-production
+    env_file:
+      - ./services/web/.env
+    environment:
+      - STORAGE_S3_ENDPOINT=http://180.25.0.2:9000
+    networks:
+      default:
+      storage_net:
+        ipv4_address: 180.25.0.4
+    depends_on:
+      database:
+        condition: service_started
+      storage:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+        restart: true
 
   database:
     image: postgres:16-alpine
@@ -25,7 +67,6 @@ services:
       - 5432:5432
 
   storage:
-    image: pixelgrid/storage:latest
     build: ./services/storage
     env_file:
       - ./services/storage/.env
@@ -34,3 +75,16 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+    networks:
+      storage_net:
+        ipv4_address: 180.25.0.2
+
+  broker:
+    build: ./services/broker
+    ports:
+      - 15672:15672
+      - 5672:5672
+    env_file:
+      - ./services/broker/.env
+    volumes:
+      - broker_data:/var/lib/rabbitmq/

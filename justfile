@@ -4,6 +4,9 @@ default:
 prod *ARGS:
   @docker compose {{ARGS}}
 
+prod-up *ARGS:
+  @just prod up --remove-orphans {{ARGS}}
+
 prod-prisma *ARGS:
   @just prod exec app pnpm prisma {{ARGS}}
 
