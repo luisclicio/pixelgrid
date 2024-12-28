@@ -13,6 +13,7 @@ export type HandleCredentialsLogin = LoginSchema & {
 
 export type HandleCredentialsRegister = RegisterSchema;
 
+// https://nextjs.org/learn/dashboard-app/adding-authentication#updating-the-login-form
 export async function handleCredentialsLogin({
   email,
   password,
@@ -24,13 +25,13 @@ export async function handleCredentialsLogin({
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          throw new Error('Credenciais inválidas.');
+          return 'Credenciais inválidas.';
         default:
-          throw new Error('Erro ao realizar autenticação.');
+          return 'Erro ao realizar autenticação.';
       }
     }
 
-    throw new Error('Erro ao realizar autenticação.');
+    throw error;
   }
 }
 

@@ -102,9 +102,7 @@ export default function AuthLogin({
             mt="md"
             color="red"
             icon={<IconInfoCircle />}
-            title={
-              loginMutation.error?.message || 'Erro ao realizar autenticação'
-            }
+            title="Erro ao realizar autenticação"
           >
             Verifique suas credenciais e tente novamente.
           </Alert>

@@ -105,9 +105,7 @@ export default function AuthRegister() {
             mt="md"
             color="red"
             icon={<IconInfoCircle />}
-            title={
-              registerMutation.error?.message || 'Erro ao realizar cadastro'
-            }
+            title="Erro ao realizar cadastro"
           >
             Verifique suas credenciais e tente novamente.
           </Alert>
