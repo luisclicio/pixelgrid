@@ -28,6 +28,7 @@ import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 import type { Image } from '@/types';
 import { deleteImages, restoreImagesFromTrash } from '@/actions/images';
@@ -42,8 +43,11 @@ export type ImageCardProps = {
 export function ImageCard({ image }: ImageCardProps) {
   const router = useRouter();
   const session = useSession();
+  const [userIsOwner, setUserIsOwner] = useState(false);
 
-  const userIsOwner = Number(session?.data?.user?.id) === image.ownerId;
+  useEffect(() => {
+    setUserIsOwner(Number(session?.data?.user?.id) === image.ownerId);
+  }, [session, image.ownerId]);
 
   async function handleFavoriteAction() {
     const result = await toggleFavoriteImage(image.id);
