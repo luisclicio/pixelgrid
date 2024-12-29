@@ -14,11 +14,13 @@ import {
   storage,
   saveFileToStorage,
   deleteFileFromStorage,
+  getSignedUrlFromStorage,
   type SaveFileToStorageResult,
   type SaveFileToStorageResultSuccess,
 } from '@/services/storage';
 import { prisma } from '@/services/db';
 import { amqpClient } from '@/services/amqp';
+import { cache } from '@/services/cache';
 
 export type ListImagesProps = {
   userId?: number;
@@ -182,7 +184,10 @@ export async function listImages({
     images.map(async ({ favorites, ...image }) => ({
       ...image,
       metadata: image.metadata as ImageMetadata,
-      url: await storage.getSignedUrl(image.key, { expiresIn: '30m' }),
+      url: await getSignedUrlFromStorage(storage, image.key, {
+        useCache: true,
+        cache,
+      }),
       favorite: favorites.length > 0,
     }))
   );
@@ -238,7 +243,10 @@ export async function getImage(imageId: Image['id']): Promise<Image | null> {
   return {
     ...image,
     metadata: image.metadata as ImageMetadata,
-    url: await storage.getSignedUrl(image.key, { expiresIn: '30m' }),
+    url: await getSignedUrlFromStorage(storage, image.key, {
+      useCache: true,
+      cache,
+    }),
     favorite: image.favorites.length > 0,
   };
 }

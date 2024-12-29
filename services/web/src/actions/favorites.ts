@@ -2,8 +2,9 @@
 
 import type { Image, ImageMetadata, ServerActionResult, Tag } from '@/types';
 import { auth } from '@/services/auth';
-import { storage } from '@/services/storage';
+import { getSignedUrlFromStorage, storage } from '@/services/storage';
 import { prisma } from '@/services/db';
+import { cache } from '@/services/cache';
 
 export type ListFavoritesUserImagesProps = {
   tagsKeys?: Tag['key'][];
@@ -64,7 +65,10 @@ export async function listFavoritesUserImages({
     images.map(async ({ favorites, ...image }) => ({
       ...image,
       metadata: image.metadata as ImageMetadata,
-      url: await storage.getSignedUrl(image.key, { expiresIn: '30m' }),
+      url: await getSignedUrlFromStorage(storage, image.key, {
+        useCache: true,
+        cache,
+      }),
       favorite: favorites.length > 0,
     }))
   );

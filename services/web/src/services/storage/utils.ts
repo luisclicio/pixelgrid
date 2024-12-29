@@ -1,5 +1,7 @@
 import { type Disk } from 'flydrive';
 
+import { Cache } from '@/libs/cache';
+
 export type SaveFileToStorageResultSuccess = {
   saved: boolean;
   name: string;
@@ -41,7 +43,7 @@ export async function saveFileToStorage(
     const fileKey = createFileKey(file.name, prefix);
     const buffer = await file.arrayBuffer();
 
-    await storage.put(fileKey, Buffer.from(buffer));
+    await storage.put(fileKey, new Uint8Array(buffer));
 
     return {
       saved: true,
@@ -65,4 +67,36 @@ export async function deleteFileFromStorage(
   key: string
 ): Promise<void> {
   return await storage.delete(key);
+}
+
+export async function getSignedUrlFromStorage(
+  storage: Disk,
+  key: string,
+  {
+    expiresIn = 60 * 60, // 60 minutes
+    useCache = false,
+    cache,
+  }: {
+    expiresIn?: number;
+    useCache?: boolean;
+    cache?: Cache;
+  } = {}
+): Promise<string> {
+  if (useCache && cache) {
+    const cachedUrl = cache.get<string>(key);
+
+    if (cachedUrl) {
+      return cachedUrl;
+    }
+  }
+
+  const signedUrl = await storage.getSignedUrl(key, {
+    expiresIn,
+  });
+
+  if (useCache && cache) {
+    cache.put(key, signedUrl, { expiresIn: expiresIn * 1000 });
+  }
+
+  return signedUrl;
 }
