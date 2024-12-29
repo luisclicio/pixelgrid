@@ -146,18 +146,20 @@ export async function listImages({
       ...(trashFilter === 'ONLY_TRASHED' && { movedToTrash: true }),
       ...(trashFilter === 'NOT_TRASHED' && { movedToTrash: false }),
       tags: {
-        some: {
-          ...(tagsIds?.length > 0 && {
-            id: {
-              in: tagsIds,
-            },
-          }),
-          ...(tagsKeys?.length > 0 && {
-            key: {
-              in: tagsKeys,
-            },
-          }),
-        },
+        ...((tagsIds?.length > 0 || tagsKeys?.length > 0) && {
+          some: {
+            ...(tagsIds?.length > 0 && {
+              id: {
+                in: tagsIds,
+              },
+            }),
+            ...(tagsKeys?.length > 0 && {
+              key: {
+                in: tagsKeys,
+              },
+            }),
+          },
+        }),
       },
     },
     include: {
