@@ -26,7 +26,7 @@ import { registerSchema } from '@/libs/validation';
 
 export default function AuthRegister() {
   const form = useForm<RegisterSchema>({
-    mode: 'uncontrolled',
+    mode: 'controlled',
     initialValues: {
       name: '',
       email: '',

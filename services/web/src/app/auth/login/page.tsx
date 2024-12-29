@@ -30,7 +30,7 @@ export default function AuthLogin({
   searchParams: { redirect?: string };
 }) {
   const form = useForm<LoginSchema>({
-    mode: 'uncontrolled',
+    mode: 'controlled',
     initialValues: {
       email: '',
       password: '',
