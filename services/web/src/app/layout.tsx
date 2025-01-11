@@ -3,6 +3,7 @@ import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { ColorSchemeScript } from '@mantine/core';
 
+import { UmamiAnalytics } from '@/components/Analytics/Umami';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
+        <UmamiAnalytics />
       </head>
 
       <body>
